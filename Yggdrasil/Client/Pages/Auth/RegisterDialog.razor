@@ -1,0 +1,22 @@
+﻿<Dialog @ref="Dialog" Title="Change Password">
+    <Body>
+        <div class="register-dialog dialog-content containerbox">
+            <StringTextField Class="username" @bind-Text="@UserName" Label="User Name" IsRequired="true"></StringTextField>
+            <StringTextField Class="pass1" @bind-Text="@Password" IsImmediate="true" Label="Password" IsPassword="true"></StringTextField>
+            <StringTextField Class="pass2" @bind-Text="@PasswordCompare" IsImmediate="true" Label="Confirm Password" IsPassword="true"></StringTextField>
+            @if (!string.IsNullOrWhiteSpace(Warning))
+            {
+                <div class="alert">
+                    <i class="material-icons">warning</i>
+                    <div>@Warning</div>
+                </div>
+            }
+        </div>
+    </Body>
+    <Actions>
+        <Button OnClick="OnAccept" IsEnabled="IsValid" IsDefault="true">Accept</Button>
+        <Button OnClick="OnCancel" IsCancel="true">Cancel</Button>
+    </Actions>
+</Dialog>
+
+<ExceptionDialog @ref="ExceptionDialog" />

@@ -1,0 +1,26 @@
+﻿<Dialog @ref="Dialog" Title="Player Character" DialogOpened="DialogOpened" DialogClosing="DialogClosing" IsEnabled="@_isBusy">
+    <Body>
+        <div class="login-dialog dialog-content">
+            <div class="character-name">
+                <StringTextField Class="character-name" @bind-Text="@Name" IsImmediate="true" Label="Character Name" IsRequired="true"></StringTextField>
+            </div>
+            <div class="user-name">
+                <Combobox Class="user-name" @bind-SelectedItem="UserName" Items="UserNames">
+                    <NullItemTemplate>
+                        Choose a Player
+                    </NullItemTemplate>
+                    <ItemTemplate>
+                        @UserName
+                    </ItemTemplate>
+                </Combobox>
+            </div>
+        </div>
+    </Body>
+    <Actions>
+        <Button OnClick="OnAccept" IsEnabled="IsValid" IsDefault="true">Accept</Button>
+        <Button OnClick="OnCancel" IsCancel="true">Cancel</Button>
+    </Actions>
+</Dialog>
+
+<ExceptionDialog @ref="ExceptionDialog" />
+<MessageBox @ref="MessageBox" />

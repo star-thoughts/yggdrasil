@@ -1,0 +1,39 @@
+﻿.pc-list {
+    display: grid;
+    grid-template-rows: 1fr max-content;
+}
+
+    .pc-list .pc-listbox {
+        grid-row: 1;
+    }
+
+    .pc-list .page-options {
+        grid-row: 2;
+    }
+
+.pc-list-item {
+    display: grid;
+    grid-template-rows: min-content min-content;
+    grid-template-columns: min-content min-content;
+}
+
+.pc-name{
+    grid-row: 1;
+    grid-column: 1 / span 2;
+    font-weight: bold;
+}
+
+.pc-user-title {
+    grid-row: 2;
+    grid-column: 1;
+    font-size: small;
+    font-weight: 500;
+    padding-left: 1em;
+}
+
+.pc-user {
+    grid-row: 2;
+    grid-column: 2;
+    font-size: small;
+    padding-left: 1em;
+}

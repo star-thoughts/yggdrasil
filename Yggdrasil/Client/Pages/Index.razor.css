@@ -1,0 +1,16 @@
+﻿.page-campaignlist {
+    display: grid;
+    grid-template-rows: min-content 1fr min-content;
+}
+
+    .page-campaignlist .page-title {
+        grid-row: 1;
+    }
+
+    .page-campaignlist .campaignlist {
+        grid-row: 2;
+    }
+
+    .page-campaignlist .page-options {
+        grid-row: 3;
+    }

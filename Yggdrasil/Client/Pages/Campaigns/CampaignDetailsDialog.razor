@@ -1,0 +1,14 @@
+﻿<Dialog @ref="Dialog" Title="Campaign Details">
+    <Body>
+        <div class="dialog-content campaign-dialog">
+            <StringTextField Class="campaign-name" @bind-Text="@_campaignName" Label="Name"></StringTextField>
+            <StringTextField Class="campaign-description" @bind-Text="@_campaignDescription" Label="Short Description"></StringTextField>
+        </div>
+    </Body>
+    <Actions>
+        <Button OnClick="OnAccept" IsEnabled="@(IsValid && !_busy)" IsDefault="true">Accept</Button>
+        <Button OnClick="OnCancel" IsEnabled="!_busy" IsCancel="true">Cancel</Button>
+    </Actions>
+</Dialog>
+
+<ExceptionDialog @ref="ExceptionDialog" />

@@ -1,0 +1,5 @@
+﻿.dialog-content {
+    display: grid;
+    grid-template-rows: min-content min-content;
+    grid-gap: var(--Grid-Gap);
+}

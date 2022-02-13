@@ -1,0 +1,103 @@
+﻿:root {
+    --Grid-Gap: 1em;
+    --listbox-item-border-normal: transparent;
+    --listbox-item-border-hover: black;
+    --listbox-item-background-hover: lightgray;
+    --listbox-item-selcted-background: lightgray;
+}
+
+html, body, .containerbox {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+
+.containerbox-scrolling {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/*Center of page style*/
+.page-center {
+    display: grid;
+    height: 100%;
+    width: 100%;
+    grid-template-rows: 1fr min-content 1fr;
+    grid-template-columns: 1fr min-content 1fr;
+}
+
+    .page-center div {
+        grid-row: 2;
+        grid-column: 2;
+    }
+
+.page-title {
+    font-size: x-large;
+}
+
+.page-subtitle {
+    font-size: larger;
+}
+
+@media (max-width: 640.98px) {
+}
+
+@media (min-width: 641px) {
+}
+
+.exception-details {
+    margin-left: 3rem;
+    margin-right: 3rem;
+}
+
+.alert {
+    margin: 1em;
+    display: grid;
+    border-radius: 5px;
+    border-color: red;
+    background: pink;
+    border-style: solid;
+    grid-template-columns: min-content 1fr;
+    grid-row-gap: 10px;
+}
+
+    .alert svg {
+        align-self: center;
+        grid-column: 1;
+    }
+
+    .alert div {
+        align-self: center;
+        grid-column: 2;
+    }
+
+.dialog-content {
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.page-options {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.no-select {
+    user-select: none;
+}
+
+.section-title {
+    border-bottom: 1px blue solid;
+    font-style: italic;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 2px;
+}
+
+.section-block {
+    box-shadow: 1px 1px 5px 0px black;
+}

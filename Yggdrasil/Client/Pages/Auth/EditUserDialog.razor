@@ -1,0 +1,24 @@
+﻿@using Yggdrasil.Identity
+
+<Dialog @ref="Dialog" Title="Edit User" DialogOpened="DialogOpened" DialogClosing="DialogClosing" IsEnabled="!_busy">
+    <Body>
+        <div class="dialog-content edit-user-dialog">
+            <StringTextField Label="Password" Class="pass1" @bind-Text="@Pass1"></StringTextField>
+            <StringTextField Label="Confirm Password" Class="pass2" @bind-Text="@Pass2"></StringTextField>
+            <div class="edit-user-roles">
+                @foreach (string role in Roles.GetAllRoles().OrderBy(p => p))
+                {
+                    string roleUpdate = role;
+                    <Checkbox IsChecked="IsRoleActive(role)" IsCheckedChanged="@(e => ToggleRole(roleUpdate, e))">@role</Checkbox>
+                }
+            </div>
+        </div>
+    </Body>
+    <Actions>
+        <Button OnClick="OnAccept" IsEnabled="!_busy">Accept</Button>
+        <Button OnClick="OnCancel" IsEnabled="!_busy">Cancel</Button>
+    </Actions>
+</Dialog>
+
+<ExceptionDialog @ref="ExceptionDialog" />
+<MessageBox @ref="MessageBox" />

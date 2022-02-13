@@ -1,0 +1,22 @@
+﻿.register-dialog {
+    display: grid;
+    grid-gap: var(--Grid-Gap);
+    grid-template-rows: min-content min-content min-content max-content;
+    overflow-y: hidden;
+}
+
+    .register-dialog .username {
+        grid-row: 1;
+    }
+
+    .register-dialog .pass1 {
+        grid-row: 2;
+    }
+
+    .register-dialog .pass2 {
+        grid-row: 3;
+    }
+
+    .register-dialog .alert {
+        grid-row: 4;
+    }

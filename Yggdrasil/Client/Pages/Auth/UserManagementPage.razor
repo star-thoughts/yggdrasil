@@ -1,0 +1,43 @@
+﻿@page "/users/manage"
+@using Yggdrasil.Identity
+@using Fiction.Controls
+
+<AuthorizeView Roles="@Roles.ManageUsers" Context="Auth">
+    <Authorized>
+        @if (!_loading)
+        {
+            <div class="page-users containerbox">
+                <div class="page-title">Manage Users</div>
+                <Listbox Class="user-list" Items="@Users" @bind-SelectedItem="@SelectedUser" Context="user">
+                    <ItemTemplate>
+                        <div class="userinfo">
+                            <div class="username">@user.UserName</div>
+                            @if (!user.IsVerified)
+                                {
+                                <div class="requires-verification">Requires Verification</div>
+                                }
+                            @if (user.IsLocked)
+                                {
+                                <div class="user-locked">Locked</div>
+                                }
+                        </div>
+                    </ItemTemplate>
+                </Listbox>
+                <div class="page-options">
+                    @* Verify the user before allowing editing *@
+                    <Button OnClick="VerifyUser" IsEnabled="SelectedUser != null && !SelectedUser.IsVerified">Verify</Button>
+                    <Button OnClick="LockUser" IsEnabled="SelectedUser != null">@(SelectedUser?.IsLocked == false ? "Lock" : "Unlock")</Button>
+                    <Button OnClick="EditUser" IsEnabled="@(SelectedUser != null)">Edit</Button>
+                    <Button OnClick="RemoveUser" IsEnabled="SelectedUser != null">Remove</Button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <Loading />
+        }
+    </Authorized>
+</AuthorizeView>
+
+<EditUserDialog @ref="EditUserDialog" />
+<ExceptionDialog @ref="ExceptionDialog" />

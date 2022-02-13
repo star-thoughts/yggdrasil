@@ -1,0 +1,39 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:59386",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Yggdrasil.Server": {
+      "commandName": "Project",
+      "dotnetRunMessages": "true",
+      "launchBrowser": true,
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+      "applicationUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "Identity__MongoDB__ConnectionString": "mongodb://mongoadmin:adminpassword@nas-home:27017/beta_yggdrasil_identity?authSource=admin",
+        "Identity__MongoDB__Database": "Yggdrasil-Identity",
+        "Identity__AdminAccount": "siteadmin",
+        "Identity__AdminPassword": "rscn42a.1",
+        "Storage__MongoDB__ConnectionString": "mongodb://mongoadmin:adminpassword@nas-home:27017/admin",
+        "Storage__MongoDB__DatabaseName": "beta_yggdrasil",
+        "Jwt__ExpireDays": "1",
+        "Jwt__Key": "YggdrasilIdentityKey.1111",
+        "Jwt__Issuer": "https://localhost",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+﻿@using Fiction.Controls
+@using Yggdrasil.Models
+@using Yggdrasil.Identity
+@using Yggdrasil.Client.Pages.Campaigns.Players
+
+<div class="pc-list containerbox">
+    @if (!_loading)
+    {
+        <Listbox Class="pc-listbox" Items="Characters" TItem="CampaignPlayerCharacter" Context="character" SelectedItem="Selected" SelectedItemChanged="SelectedItemChanged">
+            <ItemTemplate>
+                <div class="pc-list-item no-select">
+                    <div class="pc-name">@character.Name</div>
+                    <div class="pc-user-title">Player:</div>
+                    <div class="pc-user">@(!string.IsNullOrWhiteSpace(character.UserName) ? character.UserName : "(unassigned)")</div>
+                </div>
+            </ItemTemplate>
+        </Listbox>
+    }
+    else
+    {
+        <Loading />
+    }
+    <div class="page-options">
+        <AuthorizeView Roles="@Roles.Player">
+            <Button OnClick="@(_ => Claim(Selected))" IsEnabled="@(Selected != null)">Claim</Button>
+        </AuthorizeView>
+        <AuthorizeView Roles="@Roles.DungeonMaster">
+            <Button OnClick="@(_ => RemoveCharacter(Selected))" IsEnabled="Selected != null">Remove</Button>
+            <Button OnClick="@(_ => EditCharacter(Selected))" IsEnabled="Selected != null">Edit</Button>
+            <Button OnClick="CreateCharacter">New</Button>
+        </AuthorizeView>
+    </div>
+</div>
+
+<PlayerCharacterDialog @ref="PlayerCharacterDialog" />
+<MessageBox @ref="MessageBox" />
+<ExceptionDialog @ref="ExceptionDialog" />

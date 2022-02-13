@@ -1,0 +1,21 @@
+﻿.edit-user-dialog {
+    display: grid;
+    grid-gap: var(--Grid-Gap);
+    grid-template-rows: min-content min-content 1fr;
+    overflow-y: hidden;
+}
+
+
+    .edit-user-dialog .pass1 {
+        grid-row: 1;
+    }
+
+    .edit-user-dialog .pass1 {
+        grid-row: 2;
+    }
+
+    .edit-user-dialog .edit-user-roles {
+        grid-row: 3;
+        display: grid;
+        grid-auto-rows: min-content;
+    }

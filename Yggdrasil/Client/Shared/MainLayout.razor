@@ -1,0 +1,29 @@
+﻿@using Yggdrasil.Client.Pages.Auth
+@inherits LayoutComponentBase
+
+<CascadingValue Value="@Globals">
+    <div class="page containerbox">
+        <div class="sidebar">
+            <NavBar Entries="GetNavBarEntries()" Title="Campaigns" TitleAddress="/" />
+        </div>
+
+        <div class="top-row px-4 auth">
+            <AuthorizeView Context="user">
+                <Authorized>
+                    <div>@user.User.Identity.Name</div>
+                </Authorized>
+                <NotAuthorized>
+                    <Button OnClick="OnLogin">Login</Button>
+                    <Button OnClick="OnRegister">Register</Button>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <div class="content px-4 containerbox">
+            @Body
+        </div>
+    </div>
+
+    <LoginDialog @ref="LoginDialog" />
+    <RegisterDialog @ref="RegisterDialog" />
+</CascadingValue>

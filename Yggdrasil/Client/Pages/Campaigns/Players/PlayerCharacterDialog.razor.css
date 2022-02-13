@@ -1,0 +1,12 @@
+﻿.login-dialog {
+    display: flex;
+    row-gap: 4px;
+    column-gap: 4px;
+    flex-direction: column;
+}
+
+.character-name {
+}
+
+.user-name {
+}
