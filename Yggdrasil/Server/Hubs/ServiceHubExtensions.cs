@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Yggdrasil.Models;
+using Yggdrasil.Models.Locations;
 using Yggdrasil.SignalR;
 
 namespace Yggdrasil.Server.Hubs
@@ -35,28 +37,56 @@ namespace Yggdrasil.Server.Hubs
             return hub.Clients.All.SendAsync(ServiceHubMethods.CampaignUpdated, editingUser, campaign);
         }
 
-        public static Task PlayerCharacterAdded(this IHubContext<ServiceHub> hub, string campaignID, string editingUser, CampaignPlayerCharacter character)
+        public static Task PlayerCharacterAdded(this IHubContext<ServiceHub> hub, string campaignId, string editingUser, CampaignPlayerCharacter character)
         {
             if (hub == null)
                 throw new ArgumentNullException(nameof(hub));
 
-            return hub.Clients.Group(campaignID).SendAsync(ServiceHubMethods.PCAdded, editingUser, character);
+            return hub.Clients.Group(campaignId).SendAsync(ServiceHubMethods.PCAdded, editingUser, character);
         }
 
-        public static Task PlayerCharacterUpdated(this IHubContext<ServiceHub> hub, string campaignID, string editingUser, CampaignPlayerCharacter character)
+        public static Task PlayerCharacterUpdated(this IHubContext<ServiceHub> hub, string campaignId, string editingUser, CampaignPlayerCharacter character)
         {
             if (hub == null)
                 throw new ArgumentNullException(nameof(hub));
 
-            return hub.Clients.Group(campaignID).SendAsync(ServiceHubMethods.PCUpdated, editingUser, character);
+            return hub.Clients.Group(campaignId).SendAsync(ServiceHubMethods.PCUpdated, editingUser, character);
         }
 
-        public static Task PlayerCharacterRemoved(this IHubContext<ServiceHub> hub, string campaignID, string editingUser, string characterID)
+        public static Task PlayerCharacterRemoved(this IHubContext<ServiceHub> hub, string campaignId, string editingUser, string characterId)
         {
             if (hub == null)
                 throw new ArgumentNullException(nameof(hub));
 
-            return hub.Clients.Group(campaignID).SendAsync(ServiceHubMethods.PCRemoved, editingUser, characterID);
+            return hub.Clients.Group(campaignId).SendAsync(ServiceHubMethods.PCRemoved, editingUser, characterId);
+        }
+
+        public static Task LocationAdded(this IHubContext<ServiceHub> hub, string campaignId, string editingUser, Location location)
+        {
+            ArgumentNullException.ThrowIfNull(hub);
+
+            return hub.Clients.Group(campaignId).SendAsync(ServiceHubMethods.LocationAdded, editingUser, location);
+        }
+
+        public static Task LocationUpdated(this IHubContext<ServiceHub> hub, string campaignId, string editingUser, Location location)
+        {
+            ArgumentNullException.ThrowIfNull(hub);
+
+            return hub.Clients.Group(campaignId).SendAsync(ServiceHubMethods.LocationUpdated, editingUser, location);
+        }
+
+        public static Task LocationRemoved(this IHubContext<ServiceHub> hub, string campaignId, string editingUser, string locationId)
+        {
+            ArgumentNullException.ThrowIfNull(hub);
+
+            return hub.Clients.Group(campaignId).SendAsync(ServiceHubMethods.LocationRemoved, editingUser, locationId);
+        }
+
+        public static Task LocationsMoved(this IHubContext<ServiceHub> hub, string campaignId, string editingUser, LocationsMoved moved)
+        {
+            ArgumentNullException.ThrowIfNull(hub);
+
+            return hub.Clients.Group(campaignId).SendAsync(ServiceHubMethods.LocationsMoved, editingUser, moved);
         }
     }
 }

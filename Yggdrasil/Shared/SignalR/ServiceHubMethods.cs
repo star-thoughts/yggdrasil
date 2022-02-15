@@ -17,5 +17,9 @@ namespace Yggdrasil.SignalR
         public const string PCAdded = nameof(PCAdded);
         public const string PCUpdated = nameof(PCUpdated);
         public const string PCRemoved = nameof(PCRemoved);
+        public const string LocationAdded = nameof(LocationAdded);
+        public const string LocationUpdated = nameof(LocationUpdated);
+        public const string LocationRemoved = nameof(LocationRemoved);
+        public const string LocationsMoved = nameof(LocationsMoved);
     }
 }
