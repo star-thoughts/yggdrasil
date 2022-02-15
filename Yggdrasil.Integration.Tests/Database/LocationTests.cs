@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Yggdrasil.Models.Locations;
@@ -18,7 +19,7 @@ namespace Yggdrasil.Integration.Tests.Database
         {
             StorageMongoDbConfiguration configuration = new StorageMongoDbConfiguration()
             {
-                DatabaseName = "beta_yggdrasil",
+                DatabaseName = "test_yggdrasil",
                 ConnectionString = TestContext.Parameters["MongoDbUrl"],
             };
             _storage = new MongoDbCampaignStorage(configuration);
@@ -286,6 +287,43 @@ namespace Yggdrasil.Integration.Tests.Database
             await _storage.DeleteLocation(campaignId, midId, false);
             await _storage.DeleteLocation(campaignId, child1Id, false);
             await _storage.DeleteLocation(campaignId, child2Id, false);
+        }
+
+        [Test]
+        public async Task GetRootLocationsForCampaign()
+        {
+            if (_storage == null)
+                throw new ArgumentNullException(nameof(_storage));
+
+            Task<string>[] rootLocationTasks = Enumerable.Range(1, 5)
+                .Select(p => _storage.AddLocation("campaign", p.ToString(CultureInfo.InvariantCulture), "Description", null, null, Array.Empty<string>()))
+                .ToArray();
+
+            await Task.WhenAll(rootLocationTasks);
+
+            Task<string>[] childLocationTasks = rootLocationTasks
+                .Select(p => _storage.AddLocation("campaign", $"Child {p.Result}", "Description", p.Result, null, Array.Empty<string>()))
+                .ToArray();
+
+            await Task.WhenAll(childLocationTasks);
+
+            string[] rootLocationIds = rootLocationTasks.Select(p => p.Result)
+                .ToArray();
+            string[] childLocationIds = childLocationTasks.Select(p => p.Result)
+                .ToArray();
+
+            Location[] locations = (await _storage.GetRootLocations("campaign"))
+                .ToArray();
+
+            string[] locationIds = locations.Select(p => p.ID)
+                .ToArray();
+
+            CollectionAssert.AreEquivalent(rootLocationIds, locationIds);
+
+            foreach (string id in rootLocationIds)
+                await _storage.DeleteLocation("campaign", id, false);
+            foreach (string id in childLocationIds)
+                await _storage.DeleteLocation("campaign", id, false);
         }
     }
 }

@@ -109,6 +109,13 @@ namespace Yggdrasil.Server.Storage
         #endregion
         #region Locations
         /// <summary>
+        /// Gets the root locations for the given campaign
+        /// </summary>
+        /// <param name="campaignId">ID of the campaign to get the root location for</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Collection of locations that are the root locations for the campaign</returns>
+        Task<IEnumerable<Location>> GetRootLocations(string campaignId, CancellationToken cancellationToken = default);
+        /// <summary>
         /// Adds a new location to the campaign
         /// </summary>
         /// <param name="campaignId">ID of the campaign to add to</param>
