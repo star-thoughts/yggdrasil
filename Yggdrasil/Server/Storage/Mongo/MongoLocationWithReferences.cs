@@ -14,16 +14,10 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <returns>Location object</returns>
         public Location ToLocation()
         {
-            return new Location()
-            {
-                ID = Location.Id,
-                Description = Location.Description,
-                Name = Location.Name,
-                Population = Location.Population,
-                Tags = Location.Tags,
-                Parent = Parent.ToLocationListItem(),
-                ChildLocations = Children.Select(p => p.ToLocationListItem()).ToArray()
-            };
+            Location location = Location.ToLocation();
+            location.Parent = Parent?.ToLocationListItem();
+            location.ChildLocations = Children.Select(p => p.ToLocationListItem()).ToArray();
+            return location;
         }
 
         /// <summary>

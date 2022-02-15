@@ -13,5 +13,9 @@
         /// Player character
         /// </summary>
         PlayerCharacter,
+        /// <summary>
+        /// Campaign location
+        /// </summary>
+        Location,
     }
 }

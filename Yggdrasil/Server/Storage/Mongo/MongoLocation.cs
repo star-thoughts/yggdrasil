@@ -17,6 +17,7 @@ namespace Yggdrasil.Server.Storage.Mongo
             return new Location()
             {
                 ID = Id,
+                ParentId = ParentId,
                 Name = Name,
                 Population = Population,
                 Description = Description,

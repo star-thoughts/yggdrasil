@@ -1,4 +1,5 @@
-﻿using Yggdrasil.Models.Locations;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Yggdrasil.Models.Locations;
 
 namespace Yggdrasil.Server.Storage.Mongo
 {
@@ -15,7 +16,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         {
             return new LocationListItem()
             {
-                ID = Id,
+                Id = Id,
                 Name = Name,
                 Tags = Tags,
             };
@@ -23,6 +24,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <summary>
         /// Gets or sets the ID of the referenced location
         /// </summary>
+        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
         public string Id { get; set; }
         /// <summary>
         /// Gets or sets the name of the referenced location

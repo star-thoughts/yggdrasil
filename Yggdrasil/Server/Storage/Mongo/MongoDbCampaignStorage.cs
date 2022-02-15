@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Yggdrasil.Auditing;
@@ -19,16 +21,36 @@ namespace Yggdrasil.Server.Storage.Mongo
     public class MongoDbCampaignStorage : ICampaignStorage
     {
         public MongoDbCampaignStorage(IOptions<StorageConfiguration> configuration)
+            : this(configuration?.Value.MongoDB)
         {
-            _configuration = configuration?.Value.MongoDB;
-
             if (_configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
+        }
+
+        public MongoDbCampaignStorage(StorageMongoDbConfiguration configuration)
+        {
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        }
+
+        static MongoDbCampaignStorage()
+        {
+            BsonClassMap.RegisterClassMap<MongoLocationWithReferences>(p =>
+            {
+                p.AutoMap();
+                p.SetIgnoreExtraElements(true);
+            });
+
+            BsonClassMap.RegisterClassMap<MongoLocationReference>(p =>
+            {
+                p.AutoMap();
+                p.SetIgnoreExtraElements(true);
+            });
         }
 
         private readonly StorageMongoDbConfiguration _configuration;
         private static readonly UpdateOptions NotUpsertOptions = new UpdateOptions() { IsUpsert = false };
         private static readonly InsertOneOptions InsertOneOptions = new InsertOneOptions();
+        private static readonly AggregateUnwindOptions<BsonDocument> UnwindAndKeepNull = new AggregateUnwindOptions<BsonDocument>() { PreserveNullAndEmptyArrays = true };
         private MongoClient _client;
         private IMongoDatabase _database;
 
@@ -355,18 +377,18 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <summary>
         /// Adds a new location to the campaign
         /// </summary>
-        /// <param name="campaigID">ID of the campaign to add to</param>
+        /// <param name="campaignId">ID of the campaign to add to</param>
         /// <param name="name">Name of the location to add</param>
         /// <param name="description">Description of the location</param>
         /// <param name="parent">The ID of the parent location</param>
         /// <param name="population">Population data for the location</param>
         /// <param name="tags">Tags to associate with the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
-        /// <returns></returns>
-        public async Task<string> AddLocation(string campaigID, string name, string description, string parentId, Population population, string[] tags, CancellationToken cancellationToken = default)
+        /// <returns>ID of the created location</returns>
+        public async Task<string> AddLocation(string campaignId, string name, string description, string parentId, Population population, string[] tags, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(campaigID))
-                throw new ArgumentNullException(nameof(campaigID));
+            if (string.IsNullOrWhiteSpace(campaignId))
+                throw new ArgumentNullException(nameof(campaignId));
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
@@ -374,6 +396,7 @@ namespace Yggdrasil.Server.Storage.Mongo
 
             MongoLocation location = new MongoLocation()
             {
+                CampaignId = campaignId,
                 Description = description,
                 Population = population,
                 Tags = tags,
@@ -384,6 +407,26 @@ namespace Yggdrasil.Server.Storage.Mongo
             await collection.InsertOneAsync(location, InsertOneOptions, cancellationToken);
 
             return location.Id;
+        }
+
+        /// <summary>
+        /// Removes the given location from the database
+        /// </summary>
+        /// <param name="campaignId">ID of the campaign to remove</param>
+        /// <param name="locationId">ID of the location to remove</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
+        /// <exception cref="ArgumentNullException">No campaign or location ID was specified</exception>
+        public async Task RemoveLocation(string campaignId, string locationId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(campaignId))
+                throw new ArgumentNullException(nameof(campaignId));
+            if (string.IsNullOrWhiteSpace(locationId))
+                throw new ArgumentNullException(nameof(locationId));
+
+            IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
+
+            await collection.DeleteOneAsync(p => p.Id == locationId && p.CampaignId == campaignId, cancellationToken);
         }
 
         /// <summary>
@@ -432,34 +475,126 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// Gets the given location
         /// </summary>
         /// <param name="campaignId">ID of the campaign containing the location</param>
-        /// <param name="locationID">ID of the location</param>
+        /// <param name="locationId">ID of the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Location data</returns>
-        public async Task<Location> GetLocation(string campaignId, string locationID, CancellationToken cancellationToken = default)
+        public async Task<Location> GetLocation(string campaignId, string locationId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
-            if (string.IsNullOrWhiteSpace(locationID))
-                throw new ArgumentNullException(nameof(locationID));
+            if (string.IsNullOrWhiteSpace(locationId))
+                throw new ArgumentNullException(nameof(locationId));
 
             IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
 
             FilterDefinition<MongoLocation> filter = Builders<MongoLocation>.Filter.And(
-                Builders<MongoLocation>.Filter.Eq(p => p.Id, locationID),
+                Builders<MongoLocation>.Filter.Eq(p => p.Id, locationId),
                 Builders<MongoLocation>.Filter.Eq(p => p.CampaignId, campaignId));
 
-            string parentID = $"Location.{nameof(MongoLocation.ParentId)}";
-
             MongoLocationWithReferences result = await collection.Aggregate()
-                .Match(p => p.CampaignId == campaignId && p.Id == locationID)
-                .Project(p => new MongoLocationWithReferences() { Location = p })
-                .Lookup(nameof(LocationsCollection), parentID, nameof(MongoLocation.Id), nameof(MongoLocationWithReferences.Parent))
-                .Unwind(nameof(MongoLocationWithReferences.Parent))
-                .Lookup(nameof(LocationsCollection), "Location._id", nameof(MongoLocation.ParentId), nameof(MongoLocationWithReferences.Children))
+                .Match(filter)
+                .Project("{ _id: { \"$toString\": \"$_id\" }, parentId: { \"$toObjectId\": \"$ParentId\" }, \"Location\": \"$$ROOT\" }")
+                .Lookup(LocationsCollection, "parentId", "_id", "Parent")
+                .Unwind("Parent", UnwindAndKeepNull)
+                .Lookup(LocationsCollection, "_id", "ParentId", nameof(MongoLocationWithReferences.Children))
                 .As<MongoLocationWithReferences>()
                 .FirstOrDefaultAsync();
 
+            if (result == null)
+                throw new ItemNotFoundException(ItemType.Location, locationId);
+
             return result.ToLocation();
+        }
+
+        /// <summary>
+        /// Deletes the given location
+        /// </summary>
+        /// <param name="campaignId">ID of the campaign containing the location</param>
+        /// <param name="locationId">ID of the location</param>
+        /// <param name="relocateChildren">Whether or not to relocate the children to this location's parent</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Collection of locations that were updated.  Does not include deleted location.</returns>
+        /// <remarks>
+        /// When a location is deleted, if <paramref name="relocateChildren"/> is true, then the child locations parent's are updated
+        /// first to point to the parent of the location given in <paramref name="locationId"/>.  If <paramref name="relocateChildren"/> is false, then the children
+        /// are "abandoned" and become root locations.
+        /// </remarks>
+        public async Task<IEnumerable<Location>> DeleteLocation(string campaignId, string locationId, bool relocateChildren, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(campaignId))
+                throw new ArgumentNullException(nameof(campaignId));
+            if (string.IsNullOrWhiteSpace(locationId))
+                throw new ArgumentNullException(nameof(locationId));
+
+            IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
+
+            FilterDefinition<MongoLocation> filter = Builders<MongoLocation>.Filter.And(
+                Builders<MongoLocation>.Filter.Eq(p => p.Id, locationId),
+                Builders<MongoLocation>.Filter.Eq(p => p.CampaignId, campaignId));
+
+
+            MongoLocation location = await collection.FindOneAndDeleteAsync(filter);
+
+            string locationParent = relocateChildren ? location.ParentId : null;
+
+            IEnumerable<MongoLocation> updated = await RelocateLocationChildren(collection, campaignId, locationId, locationParent, cancellationToken);
+
+            return updated.Select(p => p.ToLocation());
+        }
+
+        /// <summary>
+        /// Moves locations to a new parent, or to root
+        /// </summary>
+        /// <param name="campaignId">ID of the campaign containing the locations to move</param>
+        /// <param name="newParentId">New parent ID of the locations, or null if the locations are to be root locations</param>
+        /// <param name="locationIds">Collection of IDs of locations to move</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Location>> MoveLocations(string campaignId, string newParentId, IEnumerable<string> locationIds, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(campaignId))
+                throw new ArgumentNullException(nameof(campaignId));
+            if (locationIds == null)
+                throw new ArgumentNullException(nameof(locationIds));
+            if (!locationIds.Any())
+                throw new ArgumentException(nameof(locationIds));
+
+            IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
+
+            FilterDefinition<MongoLocation> filter = Builders<MongoLocation>.Filter.And(
+                Builders<MongoLocation>.Filter.Eq(p => p.CampaignId, campaignId),
+                Builders<MongoLocation>.Filter.In(p => p.Id, locationIds));
+
+            UpdateDefinition<MongoLocation> update = Builders<MongoLocation>.Update
+                .Set(p => p.ParentId, newParentId);
+
+            await collection.UpdateManyAsync(filter, update);
+
+            var updated = await collection.Find(filter)
+                .ToListAsync();
+
+            return updated.Select(p => p.ToLocation())
+                .ToArray();
+        }
+
+        private async Task<IEnumerable<MongoLocation>> RelocateLocationChildren(IMongoCollection<MongoLocation> collection, string campaignId, string oldParentId, string newParentId, CancellationToken cancellationToken)
+        {
+            FilterDefinition<MongoLocation> filter = Builders<MongoLocation>.Filter.And(
+                Builders<MongoLocation>.Filter.Eq(p => p.CampaignId, campaignId),
+                Builders<MongoLocation>.Filter.Eq(p => p.ParentId, oldParentId));
+
+            UpdateDefinition<MongoLocation> update = Builders<MongoLocation>.Update
+                .Set(p => p.ParentId, newParentId);
+
+            List<MongoLocation> locations = await collection.Find(filter)
+                .ToListAsync();
+
+            await collection.UpdateManyAsync(filter, update, cancellationToken: cancellationToken);
+
+            foreach (MongoLocation location in locations)
+                location.ParentId = newParentId;
+
+            return locations;
         }
         #endregion
         #region Audit
