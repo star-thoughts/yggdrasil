@@ -17,7 +17,7 @@ namespace Yggdrasil.Server.Identity
         /// <summary>
         /// Gets the state of the attempt
         /// </summary>
-        public IdentityResult Result { get; }
+        public IdentityResult? Result { get; }
 
         public LockoutFailedException()
         {

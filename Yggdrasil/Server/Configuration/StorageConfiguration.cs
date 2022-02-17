@@ -13,6 +13,6 @@ namespace Yggdrasil.Server.Configuration
         /// <summary>
         /// Gets or sets the MongoDB configuration for storing data
         /// </summary>
-        public StorageMongoDbConfiguration MongoDB { get; set; }
+        public StorageMongoDbConfiguration? MongoDB { get; set; }
     }
 }

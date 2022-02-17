@@ -21,22 +21,22 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <summary>
         /// Gets or sets hte name of the campaign
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
         /// <summary>
         /// Gets or sets a short description of the campaign
         /// </summary>
-        public string Overview { get; set; }
+        public string? Overview { get; set; }
         /// <summary>
         /// Gets or sets the username of the dungeon master
         /// </summary>
-        public string DungeonMaster { get; set; }
+        public string? DungeonMaster { get; set; }
         /// <summary>
         /// Gets or sets data about users in the campaign
         /// </summary>
-        public CampaignUserData[] Users { get; set; } = Array.Empty<CampaignUserData>();
+        public CampaignUserData[]? Users { get; set; } = Array.Empty<CampaignUserData>();
         /// <summary>
         /// Gets or sets a collection of player characters in the campaign
         /// </summary>
-        public CampaignPlayerCharacter[] PlayerCharacters { get; set; } = Array.Empty<CampaignPlayerCharacter>();
+        public CampaignPlayerCharacter[]? PlayerCharacters { get; set; } = Array.Empty<CampaignPlayerCharacter>();
     }
 }

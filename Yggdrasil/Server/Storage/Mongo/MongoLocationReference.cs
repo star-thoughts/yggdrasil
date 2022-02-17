@@ -25,14 +25,14 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// Gets or sets the ID of the referenced location
         /// </summary>
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         /// <summary>
         /// Gets or sets the name of the referenced location
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
         /// <summary>
         /// Gets or sets tags associated with the referenced location
         /// </summary>
-        public string[] Tags { get; set; }
+        public string[]? Tags { get; set; }
     }
 }

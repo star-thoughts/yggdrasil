@@ -20,7 +20,8 @@ namespace Yggdrasil.Server
         {
             IHost host = CreateHostBuilder(args).Build();
 
-            ICampaignStorage storage = host.Services.GetService<ICampaignStorage>();
+            ICampaignStorage storage = host.Services.GetService<ICampaignStorage>() ?? throw new InvalidOperationException("Storage not correctly set.");
+
             await storage.Connect();
 
             await SetupIdentity(host);
@@ -67,7 +68,11 @@ namespace Yggdrasil.Server
                         throw new InvalidOperationException("Could not create default admin account");
                 }
 
-                ApplicationUser admin = userManager.Users.FirstOrDefault(p => p.UserName == identityDefaults.AdminAccount);
+                ApplicationUser? admin = userManager.Users.FirstOrDefault(p => p.UserName == identityDefaults.AdminAccount);
+                
+                if (admin == null)
+                    throw new InvalidOperationException("An admin account must be specified.");
+
                 IEnumerable<string> roles = await userManager.GetRolesAsync(admin);
                 roles = Roles.GetDefaultAdminRoles().Except(roles);
 

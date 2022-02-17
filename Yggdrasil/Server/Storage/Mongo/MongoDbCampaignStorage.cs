@@ -21,10 +21,8 @@ namespace Yggdrasil.Server.Storage.Mongo
     public class MongoDbCampaignStorage : ICampaignStorage
     {
         public MongoDbCampaignStorage(IOptions<StorageConfiguration> configuration)
-            : this(configuration?.Value.MongoDB)
         {
-            if (_configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
+            _configuration = configuration?.Value?.MongoDB ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public MongoDbCampaignStorage(StorageMongoDbConfiguration configuration)
@@ -51,8 +49,8 @@ namespace Yggdrasil.Server.Storage.Mongo
         private static readonly UpdateOptions NotUpsertOptions = new UpdateOptions() { IsUpsert = false };
         private static readonly InsertOneOptions InsertOneOptions = new InsertOneOptions();
         private static readonly AggregateUnwindOptions<BsonDocument> UnwindAndKeepNull = new AggregateUnwindOptions<BsonDocument>() { PreserveNullAndEmptyArrays = true };
-        private MongoClient _client;
-        private IMongoDatabase _database;
+        private MongoClient? _client;
+        private IMongoDatabase? _database;
 
         private const string AuditCollection = "audit";
         private const string CampaignsCollection = "campaigns";
@@ -187,7 +185,7 @@ namespace Yggdrasil.Server.Storage.Mongo
             FilterDefinition<MongoCampaign> filter = Builders<MongoCampaign>.Filter
                 .Eq(p => p.ID, objectID);
 
-            IEnumerable<CampaignPlayerCharacter> characters = await collection.Find(filter)
+            IEnumerable<CampaignPlayerCharacter>? characters = await collection.Find(filter)
                 .Limit(1)
                 .Project(p => p.PlayerCharacters)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -221,7 +219,9 @@ namespace Yggdrasil.Server.Storage.Mongo
 
 #pragma warning disable CS0251 // Indexing an array with a negative index
             UpdateDefinition<MongoCampaign> update = Builders<MongoCampaign>.Update
+#nullable disable
                 .Set(p => p.PlayerCharacters[-1].UserName, userName);
+#nullable enable
 #pragma warning restore CS0251 // Indexing an array with a negative index
 
             await collection.UpdateOneAsync(filter, update, NotUpsertOptions, cancellationToken);
@@ -251,7 +251,9 @@ namespace Yggdrasil.Server.Storage.Mongo
 #pragma warning disable CS0251 // Indexing an array with a negative index
             return await collection.Find(filter)
                 .Limit(1)
+#nullable disable
                 .Project(p => p.PlayerCharacters[-1])
+#nullable enable
                 .FirstOrDefaultAsync(cancellationToken);
 #pragma warning restore CS0251 // Indexing an array with a negative index
         }
@@ -279,7 +281,7 @@ namespace Yggdrasil.Server.Storage.Mongo
             return await collection.Find(filter)
                 .Limit(1)
                 .Project(p => p.Users)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken) ?? Array.Empty<CampaignUserData>();
         }
         /// <summary>
         /// Updates a player character's information
@@ -308,7 +310,9 @@ namespace Yggdrasil.Server.Storage.Mongo
 
 #pragma warning disable CS0251 // Indexing an array with a negative index
             UpdateDefinition<MongoCampaign> update = Builders<MongoCampaign>.Update
+#nullable disable
                 .Set(p => p.PlayerCharacters[-1], character);
+#nullable enable
 #pragma warning restore CS0251 // Indexing an array with a negative index
 
             UpdateResult result = await collection.UpdateOneAsync(filter, update, NotUpsertOptions, cancellationToken);
@@ -380,7 +384,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <param name="campaignId">ID of the campaign to get the root location for</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Collection of locations that are the root locations for the campaign</returns>
-        public async Task<IEnumerable<Location>> GetRootLocations(string campaignId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<LocationListItem>> GetRootLocations(string campaignId, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
@@ -392,9 +396,15 @@ namespace Yggdrasil.Server.Storage.Mongo
                 Builders<MongoLocation>.Filter.Eq(p => p.ParentId, null));
 
             List<MongoLocation> locations = await collection.Find(filter)
+                .Project(p => new MongoLocation()
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Tags = p.Tags,
+                })
                 .ToListAsync();
 
-            return locations.Select(p => p.ToLocation())
+            return locations.Select(p => p.ToLocationListItem())
                 .ToArray();
         }
         /// <summary>
@@ -408,7 +418,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <param name="tags">Tags to associate with the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>ID of the created location</returns>
-        public async Task<string> AddLocation(string campaignId, string name, string description, string parentId, Population population, string[] tags, CancellationToken cancellationToken = default)
+        public async Task<Location> AddLocation(string campaignId, string name, string description, string? parentId, Population? population, string[] tags, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
@@ -429,7 +439,7 @@ namespace Yggdrasil.Server.Storage.Mongo
 
             await collection.InsertOneAsync(location, InsertOneOptions, cancellationToken);
 
-            return location.Id;
+            return location.ToLocation();
         }
 
         /// <summary>
@@ -523,10 +533,10 @@ namespace Yggdrasil.Server.Storage.Mongo
                 .As<MongoLocationWithReferences>()
                 .FirstOrDefaultAsync();
 
-            if (result == null)
+            if (result?.Location == null)
                 throw new ItemNotFoundException(ItemType.Location, locationId);
 
-            return result.ToLocation();
+            return result.ToLocation(locationId);
         }
 
         /// <summary>
@@ -558,7 +568,7 @@ namespace Yggdrasil.Server.Storage.Mongo
 
             MongoLocation location = await collection.FindOneAndDeleteAsync(filter);
 
-            string locationParent = relocateChildren ? location.ParentId : null;
+            string? locationParent = relocateChildren ? location.ParentId : null;
 
             IEnumerable<MongoLocation> updated = await RelocateLocationChildren(collection, campaignId, locationId, locationParent, cancellationToken);
 
@@ -573,7 +583,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <param name="locationIds">Collection of IDs of locations to move</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns></returns>
-        public async Task<IEnumerable<Location>> MoveLocations(string campaignId, string newParentId, IEnumerable<string> locationIds, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Location>> MoveLocations(string campaignId, string? newParentId, IEnumerable<string> locationIds, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
@@ -600,7 +610,7 @@ namespace Yggdrasil.Server.Storage.Mongo
                 .ToArray();
         }
 
-        private async Task<IEnumerable<MongoLocation>> RelocateLocationChildren(IMongoCollection<MongoLocation> collection, string campaignId, string oldParentId, string newParentId, CancellationToken cancellationToken)
+        private async Task<IEnumerable<MongoLocation>> RelocateLocationChildren(IMongoCollection<MongoLocation> collection, string campaignId, string oldParentId, string? newParentId, CancellationToken cancellationToken)
         {
             FilterDefinition<MongoLocation> filter = Builders<MongoLocation>.Filter.And(
                 Builders<MongoLocation>.Filter.Eq(p => p.CampaignId, campaignId),

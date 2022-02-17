@@ -37,7 +37,7 @@ namespace Yggdrasil.Server.MiddleWare
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
         public async Task InvokeAsync(HttpContext context)
         {
-            ProblemDetails problem = null;
+            ProblemDetails? problem = null;
 
             try
             {
@@ -62,10 +62,15 @@ namespace Yggdrasil.Server.MiddleWare
                     Title = "Conflict",
                 };
                 int pos = 0;
-                foreach (IdentityError error in exc.Result.Errors)
+                IEnumerable<IdentityError>? errors = exc.Result?.Errors;
+
+                if (errors != null)
                 {
-                    problem.Extensions[pos.ToString(CultureInfo.InvariantCulture)] = error.Description;
-                    pos++;
+                    foreach (IdentityError? error in errors)
+                    {
+                        problem.Extensions[pos.ToString(CultureInfo.InvariantCulture)] = error?.Description;
+                        pos++;
+                    }
                 }
             }
             catch (LoginException exc)
@@ -84,13 +89,15 @@ namespace Yggdrasil.Server.MiddleWare
                 problem.Extensions["traceid"] = Activity.Current?.Id ?? context.TraceIdentifier;
                 problem.Extensions["connectionid"] = context.TraceIdentifier;
 
-                context.Response.StatusCode = problem.Status.Value;
+                if (problem.Status.HasValue)
+                    context.Response.StatusCode = problem.Status.Value;
+
                 context.Response.ContentType = "application/problem+json";
                 await JsonSerializer.SerializeAsync(context.Response.Body, problem);
             }
         }
 
-        public static ProblemDetails CreateProblemDetails(HttpContext context, HttpStatusCode statusCode, string title, string detail, Dictionary<string, string> extensions = null)
+        public static ProblemDetails CreateProblemDetails(HttpContext context, HttpStatusCode statusCode, string title, string detail, Dictionary<string, string>? extensions = null)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));

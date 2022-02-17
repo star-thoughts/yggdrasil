@@ -8,10 +8,10 @@
         /// <summary>
         /// Gets or sets the URI to use to connect to the mongo DB
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string? ConnectionString { get; set; }
         /// <summary>
         /// Gets or sets the name of the database to use
         /// </summary>
-        public string Database { get; set; }
+        public string? Database { get; set; }
     }
 }

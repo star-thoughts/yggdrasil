@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Yggdrasil.Auditing;
@@ -41,13 +40,13 @@ namespace Yggdrasil.Server.Controllers
                               IOptions<JwtConfiguration> jwtConfig,
                               ICampaignStorage storage)
         {
-            _logger = logger;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _signInManager = signInManager;
-            _adminHub = adminHub;
-            _jwtConfig = jwtConfig?.Value;
-            _storage = storage;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+            _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+            _adminHub = adminHub ?? throw new ArgumentNullException(nameof(adminHub));
+            _jwtConfig = jwtConfig?.Value ?? throw new ArgumentNullException(nameof(_jwtConfig));
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         }
 
         private readonly ILogger _logger;
@@ -64,18 +63,18 @@ namespace Yggdrasil.Server.Controllers
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            ApplicationUser appUser = new ApplicationUser() { UserName = request.UserName, IsVerified = false };
+            ApplicationUser? appUser = new ApplicationUser() { UserName = request.UserName, IsVerified = false };
             IdentityResult result = await _userManager.CreateAsync(appUser, request.Password);
             appUser = _userManager.GetUser(request.UserName);
 
             if (result.Succeeded && appUser != null)
             {
-                _ = _adminHub.UserAdded(HttpContext.User.Identity.Name, await appUser.ToUserInfo(_userManager));
+                _ = _adminHub.UserAdded(GetUserName(), await appUser.ToUserInfo(_userManager));
 
                 _ = _storage.AddAuditRecord(new AuditRecord()
                 {
                     DateTime = DateTime.UtcNow,
-                    User = HttpContext.User.Identity.Name,
+                    User = GetUserName(),
                     RecordType = AuditRecordTypes.User,
                     Action = AuditAction.Created,
                     Variables = new Dictionary<string, string>()
@@ -107,7 +106,7 @@ namespace Yggdrasil.Server.Controllers
             if (info == null)
                 return BadRequest();
 
-            ApplicationUser appUser = _userManager.GetUser(info.UserName);
+            ApplicationUser? appUser = _userManager.GetUser(info.UserName);
 
             if (appUser == null)
                 throw new LoginException($"Username or password is incorrect.");
@@ -117,7 +116,7 @@ namespace Yggdrasil.Server.Controllers
             if (result.Succeeded)
             {
                 //  Unverified users cannot log in
-                if (appUser != null && !appUser.IsVerified)
+                if (!appUser.IsVerified)
                     throw new LoginException($"User '{appUser.UserName}' is unverified.");
 
                 ApplicationRole[] roles = _roleManager.Roles.ToArray();
@@ -137,7 +136,7 @@ namespace Yggdrasil.Server.Controllers
                 _ = _storage.AddAuditRecord(new AuditRecord()
                 {
                     DateTime = DateTime.UtcNow,
-                    User = HttpContext.User.Identity.Name,
+                    User = GetUserName(),
                     RecordType = AuditRecordTypes.User,
                     Action = AuditAction.Edited,
                     Variables = new Dictionary<string, string>()
@@ -167,19 +166,22 @@ namespace Yggdrasil.Server.Controllers
             if (string.IsNullOrWhiteSpace(userName))
                 return BadRequest();
 
-            ApplicationUser user = _userManager.GetUser(userName);
-
-            if (string.Equals(userName, User.Identity.Name, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(userName, GetUserName(), StringComparison.OrdinalIgnoreCase))
                 return Unauthorized();
+
+            ApplicationUser? user = _userManager.GetUser(userName);
+
+            if (user == null)
+                return BadRequest();
 
             await _userManager.DeleteAsync(user);
 
-            _ = _adminHub.UserRemoved(HttpContext.User.Identity.Name, user.UserName);
+            _ = _adminHub.UserRemoved(GetUserName(), user.UserName);
 
             _ = _storage.AddAuditRecord(new AuditRecord()
             {
                 DateTime = DateTime.UtcNow,
-                User = User.Identity.Name,
+                User = GetUserName(),
                 RecordType = AuditRecordTypes.User,
                 Action = AuditAction.Removed,
                 Variables = new Dictionary<string, string>()
@@ -218,7 +220,7 @@ namespace Yggdrasil.Server.Controllers
         [Authorize(Roles = Roles.ManageUsers, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetUsers(string userName)
         {
-            ApplicationUser user = _userManager.GetUser(userName);
+            ApplicationUser? user = _userManager.GetUser(userName);
             if (user == null)
                 return NotFound();
 
@@ -236,20 +238,20 @@ namespace Yggdrasil.Server.Controllers
         [Authorize(Roles = Roles.ManageUsers, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> VerifyUser([Required] string userName)
         {
-            ApplicationUser user = _userManager.GetUser(userName);
+            ApplicationUser? user = _userManager.GetUser(userName);
             if (user == null)
                 return NotFound();
 
             user.IsVerified = true;
             await _userManager.UpdateAsync(user);
 
-            _ = _adminHub.UserUpdated(HttpContext.User.Identity.Name, await user.ToUserInfo(_userManager));
+            _ = _adminHub.UserUpdated(GetUserName(), await user.ToUserInfo(_userManager));
             _ = _storage.AddAuditRecord(new AuditRecord()
             {
                 DateTime = DateTime.UtcNow,
                 RecordType = AuditRecordTypes.User,
                 Action = AuditAction.Edited,
-                User = HttpContext.User.Identity.Name,
+                User = GetUserName(),
                 Variables = new Dictionary<string, string>()
                 {
                     { AuditKeys.ID, user.Id.ToString() },
@@ -274,7 +276,11 @@ namespace Yggdrasil.Server.Controllers
             if (string.IsNullOrWhiteSpace(roles))
                 roles = string.Empty;
 
-            ApplicationUser user = _userManager.GetUser(userName);
+            ApplicationUser? user = _userManager.GetUser(userName);
+
+            if (user == null)
+                return Unauthorized();
+
             IList<string> currentRoles = await _userManager.GetRolesAsync(user);
             string[] setRoles = roles.Split(new string[] { ", ", "," }, System.StringSplitOptions.RemoveEmptyEntries);
             string[] allRoles = Roles.GetAllRoles().ToArray();
@@ -292,21 +298,24 @@ namespace Yggdrasil.Server.Controllers
             //  Get the updated copy to send to clients
             user = _userManager.GetUser(userName);
 
-            _ = _adminHub.UserUpdated(HttpContext.User.Identity.Name, await user.ToUserInfo(_userManager));
-
-            _ = _storage.AddAuditRecord(new AuditRecord()
+            if (user != null)
             {
-                DateTime = DateTime.UtcNow,
-                RecordType = AuditRecordTypes.User,
-                Action = AuditAction.Edited,
-                User = HttpContext.User.Identity.Name,
-                Variables = new Dictionary<string, string>()
+                _ = _adminHub.UserUpdated(GetUserName(), await user.ToUserInfo(_userManager));
+
+                _ = _storage.AddAuditRecord(new AuditRecord()
+                {
+                    DateTime = DateTime.UtcNow,
+                    RecordType = AuditRecordTypes.User,
+                    Action = AuditAction.Edited,
+                    User = GetUserName(),
+                    Variables = new Dictionary<string, string>()
                 {
                     { AuditKeys.ID, user.Id.ToString() },
                     { AuditKeys.UserUserName, userName },
                     { AuditKeys.UserPermissions, roles }
                 },
-            });
+                });
+            }
 
             return Ok();
         }
@@ -326,7 +335,7 @@ namespace Yggdrasil.Server.Controllers
             if (string.IsNullOrWhiteSpace(password))
                 return BadRequest();
 
-            ApplicationUser user = _userManager.GetUser(userName);
+            ApplicationUser? user = _userManager.GetUser(userName);
             if (user == null)
                 return NotFound();
             if (user.IsSiteAdmin)
@@ -340,7 +349,7 @@ namespace Yggdrasil.Server.Controllers
                 _ = _storage.AddAuditRecord(new AuditRecord()
                 {
                     DateTime = DateTime.UtcNow,
-                    User = HttpContext.User.Identity.Name,
+                    User = GetUserName(),
                     RecordType = AuditRecordTypes.User,
                     Action = AuditAction.Edited,
                     Variables = new Dictionary<string, string>()
@@ -377,7 +386,7 @@ namespace Yggdrasil.Server.Controllers
             if (string.IsNullOrEmpty(originalPassword))
                 return BadRequest();
 
-            ApplicationUser user = _userManager.GetUser(userName);
+            ApplicationUser? user = _userManager.GetUser(userName);
             if (user == null)
                 return NotFound();
 
@@ -388,7 +397,7 @@ namespace Yggdrasil.Server.Controllers
                 _ = _storage.AddAuditRecord(new AuditRecord()
                 {
                     DateTime = DateTime.UtcNow,
-                    User = HttpContext.User.Identity.Name,
+                    User = GetUserName(),
                     RecordType = AuditRecordTypes.User,
                     Action = AuditAction.Edited,
                     Variables = new Dictionary<string, string>()
@@ -420,14 +429,14 @@ namespace Yggdrasil.Server.Controllers
             if (string.IsNullOrEmpty(userName))
                 return BadRequest();
 
-            ApplicationUser user = _userManager.GetUser(userName);
+            ApplicationUser? user = _userManager.GetUser(userName);
             if (user == null)
                 return NotFound();
 
-            if (string.Equals(userName, User.Identity.Name, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(userName, GetUserName(), StringComparison.OrdinalIgnoreCase))
                 return Unauthorized();
 
-            IdentityResult result = null;
+            IdentityResult? result = null;
             if (lockout)
             {
                 //  Set the user as locked out
@@ -446,12 +455,12 @@ namespace Yggdrasil.Server.Controllers
 
             if (result.Succeeded)
             {
-                _ = _adminHub.UserUpdated(HttpContext.User.Identity.Name, await user.ToUserInfo(_userManager));
+                _ = _adminHub.UserUpdated(GetUserName(), await user.ToUserInfo(_userManager));
 
                 _ = _storage.AddAuditRecord(new AuditRecord()
                 {
                     DateTime = DateTime.UtcNow,
-                    User = HttpContext.User.Identity.Name,
+                    User = GetUserName(),
                     RecordType = AuditRecordTypes.User,
                     Action = AuditAction.Edited,
                     Variables = new Dictionary<string, string>()
@@ -474,6 +483,11 @@ namespace Yggdrasil.Server.Controllers
         private Dictionary<string, string> GetRoleMap()
         {
             return _roleManager.Roles.ToDictionary(p => p.Id.ToString(), p => p.Name);
+        }
+
+        string GetUserName()
+        {
+            return User?.Identity?.Name ?? throw new InvalidOperationException("A user claim must be sent");
         }
         #endregion
     }

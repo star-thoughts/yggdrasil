@@ -114,7 +114,7 @@ namespace Yggdrasil.Server.Storage
         /// <param name="campaignId">ID of the campaign to get the root location for</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Collection of locations that are the root locations for the campaign</returns>
-        Task<IEnumerable<Location>> GetRootLocations(string campaignId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<LocationListItem>> GetRootLocations(string campaignId, CancellationToken cancellationToken = default);
         /// <summary>
         /// Adds a new location to the campaign
         /// </summary>
@@ -126,7 +126,7 @@ namespace Yggdrasil.Server.Storage
         /// <param name="tags">Tags to associate with the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>ID of the created location</returns>
-        Task<string> AddLocation(string campaignId, string name, string description, string parentId, Population population, string[] tags, CancellationToken cancellationToken = default);
+        Task<Location> AddLocation(string campaignId, string name, string description, string? parentId, Population? population, string[] tags, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes the given location from the database
@@ -179,7 +179,7 @@ namespace Yggdrasil.Server.Storage
         /// <param name="locationIds">Collection of IDs of locations to move</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns></returns>
-        Task<IEnumerable<Location>> MoveLocations(string campaignId, string newParentId, IEnumerable<string> locationIds, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Location>> MoveLocations(string campaignId, string? newParentId, IEnumerable<string> locationIds, CancellationToken cancellationToken = default);
         #endregion
     }
 }

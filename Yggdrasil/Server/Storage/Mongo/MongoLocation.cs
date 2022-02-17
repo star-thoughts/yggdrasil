@@ -11,12 +11,12 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <summary>
         /// Returns the communication model for this location
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Location information</returns>
         public Location ToLocation()
         {
             return new Location()
             {
-                ID = Id,
+                Id = Id,
                 ParentId = ParentId,
                 Name = Name,
                 Population = Population,
@@ -25,34 +25,47 @@ namespace Yggdrasil.Server.Storage.Mongo
             };
         }
         /// <summary>
+        /// Returns the communication model for this location in a list of locations
+        /// </summary>
+        /// <returns>Location information</returns>
+        public LocationListItem ToLocationListItem()
+        {
+            return new LocationListItem()
+            {
+                Id = Id,
+                Name = Name,
+                Tags = Tags,
+            };
+        }
+        /// <summary>
         /// Gets or sets the ID of the location
         /// </summary>
         [BsonId]
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         /// <summary>
         /// Gets or sets the ID of the parent
         /// </summary>
-        public string ParentId { get; set; }
+        public string? ParentId { get; set; }
         /// <summary>
         /// Gets or sets the ID of the campaign
         /// </summary>
-        public string CampaignId { get; set; }
+        public string? CampaignId { get; set; }
         /// <summary>
         /// Gets or sets the name of the location
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
         /// <summary>
         /// Gets or sets the population of this location
         /// </summary>
-        public Population Population { get; set; }
+        public Population? Population { get; set; }
         /// <summary>
         /// Gets or sets a description of this location in MarkDown
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
         /// <summary>
         /// Gets or sets tags to use for this location
         /// </summary>
-        public string[] Tags { get; set; }
+        public string[]? Tags { get; set; }
     }
 }

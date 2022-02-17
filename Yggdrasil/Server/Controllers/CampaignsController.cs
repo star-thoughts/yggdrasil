@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net.Mime;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using Yggdrasil.Auditing;
 using Yggdrasil.Identity;
@@ -43,12 +44,12 @@ namespace Yggdrasil.Server.Controllers
                                    IOptions<JwtConfiguration> jwtConfig,
                                    IHubContext<ServiceHub> hub)
         {
-            _logger = logger;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _storage = storage;
-            _hub = hub;
-            _jwtConfig = jwtConfig?.Value;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _hub = hub ?? throw new ArgumentNullException(nameof(hub));
+            _jwtConfig = jwtConfig?.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
         }
 
         private readonly ILogger<CampaignsController> _logger;
@@ -83,8 +84,11 @@ namespace Yggdrasil.Server.Controllers
         [Authorize(Roles = Roles.CreateCampaign, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> CreateCampaign([Required] string name, [Required] string description)
         {
-            string user = HttpContext.User.Identity.Name;
-            string campaignID = await _storage.CreateCampaign(user, name, description, HttpContext.RequestAborted);
+            string? user = HttpContext?.User?.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(user))
+                return BadRequest();
+
+            string campaignID = await _storage.CreateCampaign(user, name, description, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             _ = _hub.CampaignAdded(user, new CampaignOverview() { Name = name, ShortDescription = description, DungeonMaster = user, ID = campaignID });
 
@@ -100,7 +104,7 @@ namespace Yggdrasil.Server.Controllers
                     { AuditKeys.Name, name },
                     { AuditKeys.Description, description },
                 },
-            }, HttpContext.RequestAborted);
+            }, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             return CreatedAtAction(nameof(OpenCampaign), new { campaignID }, new CreateCampaignResult() { ID = campaignID });
         }
@@ -118,8 +122,11 @@ namespace Yggdrasil.Server.Controllers
         [Authorize(Roles = Roles.ManageCampaigns, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> DeleteCampaign([Required] string campaignID)
         {
-            string user = HttpContext.User.Identity.Name;
-            await _storage.DeleteCampaign(campaignID, HttpContext.RequestAborted);
+            string? user = HttpContext?.User?.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(user))
+                return BadRequest();
+
+            await _storage.DeleteCampaign(campaignID, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             _ = _hub.CampaignRemoved(user, campaignID);
 
@@ -131,7 +138,7 @@ namespace Yggdrasil.Server.Controllers
                 RecordType = AuditRecordTypes.Campaign,
                 User = user,
                 Variables = new Dictionary<string, string>(),
-            }, HttpContext.RequestAborted);
+            }, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             return NoContent();
         }
@@ -149,10 +156,13 @@ namespace Yggdrasil.Server.Controllers
         [Authorize(Roles = Roles.DeleteCampaign, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> DeleteCampaign()
         {
-            string user = HttpContext.User.Identity.Name;
-            string campaignID = GetCampaignID(true);
+            string? user = HttpContext?.User?.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(user))
+                return BadRequest();
 
-            await _storage.DeleteCampaign(campaignID, HttpContext.RequestAborted);
+            string campaignID = GetCampaignID();
+
+            await _storage.DeleteCampaign(campaignID, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             _ = _hub.CampaignRemoved(user, campaignID);
 
@@ -164,7 +174,7 @@ namespace Yggdrasil.Server.Controllers
                 RecordType = AuditRecordTypes.Campaign,
                 User = user,
                 Variables = new Dictionary<string, string>(),
-            }, HttpContext.RequestAborted);
+            }, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             return NoContent();
         }
@@ -173,9 +183,9 @@ namespace Yggdrasil.Server.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> OpenCampaign([Required] string campaignID)
         {
-            GetCampaignResult campaign = await _storage.GetCampaign(campaignID, HttpContext.RequestAborted);
+            GetCampaignResult campaign = await _storage.GetCampaign(campaignID, HttpContext?.RequestAborted ?? CancellationToken.None);
 
-            ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
+            ApplicationUser user = await _userManager.GetUserAsync(HttpContext?.User);
             ApplicationRole[] roles = _roleManager.Roles.ToArray();
             string[] campaignRoles = campaign.Users.FirstOrDefault(p => string.Equals(p.UserName, user.UserName, StringComparison.OrdinalIgnoreCase))
                 ?.Roles
@@ -197,7 +207,7 @@ namespace Yggdrasil.Server.Controllers
         {
             string campaignID = GetCampaignID();
 
-            GetCampaignResult result = await _storage.GetCampaign(campaignID, HttpContext.RequestAborted);
+            GetCampaignResult result = await _storage.GetCampaign(campaignID, HttpContext?.RequestAborted ?? CancellationToken.None);
 
             return Ok(result);
         }
@@ -212,7 +222,7 @@ namespace Yggdrasil.Server.Controllers
         {
             string campaignID = GetCampaignID();
 
-            return Ok(await _storage.GetCampaignUsers(campaignID, HttpContext.RequestAborted));
+            return Ok(await _storage.GetCampaignUsers(campaignID, HttpContext?.RequestAborted ?? CancellationToken.None));
         }
         #endregion
         #region Player Characters
@@ -226,7 +236,7 @@ namespace Yggdrasil.Server.Controllers
         {
             string campaignID = GetCampaignID();
 
-            return Ok(await _storage.GetPlayerCharacters(campaignID, HttpContext.RequestAborted));
+            return Ok(await _storage.GetPlayerCharacters(campaignID, HttpContext?.RequestAborted ?? CancellationToken.None));
         }
 
         /// <summary>
@@ -239,9 +249,9 @@ namespace Yggdrasil.Server.Controllers
         {
             string campaignID = GetCampaignID();
 
-            await _storage.ClaimCharacter(campaignID, characterID, HttpContext.User.Identity.Name, HttpContext.RequestAborted);
+            await _storage.ClaimCharacter(campaignID, characterID, GetUserName(), HttpContext?.RequestAborted ?? CancellationToken.None);
 
-            _ = _hub.PlayerCharacterUpdated(campaignID, HttpContext.User.Identity.Name, await _storage.GetPlayerCharacter(campaignID, characterID, HttpContext.RequestAborted));
+            _ = _hub.PlayerCharacterUpdated(campaignID, GetUserName(), await _storage.GetPlayerCharacter(campaignID, characterID, HttpContext?.RequestAborted ?? CancellationToken.None));
 
             return NoContent();
         }
@@ -252,9 +262,9 @@ namespace Yggdrasil.Server.Controllers
         {
             string campaignID = GetCampaignID();
 
-            await _storage.UpdatePlayerCharacter(campaignID, character, HttpContext.RequestAborted);
+            await _storage.UpdatePlayerCharacter(campaignID, character, HttpContext?.RequestAborted ?? CancellationToken.None);
 
-            _ = _hub.PlayerCharacterUpdated(campaignID, HttpContext.User.Identity.Name, character);
+            _ = _hub.PlayerCharacterUpdated(campaignID, GetUserName(), character);
 
             return NoContent();
         }
@@ -268,9 +278,9 @@ namespace Yggdrasil.Server.Controllers
 
             string campaignID = GetCampaignID();
 
-            character.ID = await _storage.CreatePlayerCharacter(campaignID, character, HttpContext.RequestAborted);
+            character.ID = await _storage.CreatePlayerCharacter(campaignID, character, HttpContext?.RequestAborted ?? CancellationToken.None);
 
-            _ = _hub.PlayerCharacterAdded(campaignID, HttpContext.User.Identity.Name, character);
+            _ = _hub.PlayerCharacterAdded(campaignID, GetUserName(), character);
 
             return NoContent();
         }
@@ -284,9 +294,9 @@ namespace Yggdrasil.Server.Controllers
 
             string campaignID = GetCampaignID();
 
-            await _storage.RemoveCharacter(campaignID, id, HttpContext.RequestAborted);
+            await _storage.RemoveCharacter(campaignID, id, HttpContext?.RequestAborted ?? CancellationToken.None);
 
-            _ = _hub.PlayerCharacterRemoved(campaignID, HttpContext.User.Identity.Name, id);
+            _ = _hub.PlayerCharacterRemoved(campaignID, GetUserName(), id);
 
             return NoContent();
         }
@@ -296,17 +306,22 @@ namespace Yggdrasil.Server.Controllers
         /// Gets the ID of the campaign from the user's claims
         /// </summary>
         /// <returns>ID of the campaign, or null or empty if one is not found</returns>
-        string GetCampaignID(bool required = true)
+        string GetCampaignID()
         {
             if (HttpContext.User.Identity is ClaimsIdentity identity)
             {
-                string campaignID = identity.Claims.FirstOrDefault(p => string.Equals(p.Type, "campaign", StringComparison.Ordinal))?.Value;
-                if (required && string.IsNullOrWhiteSpace(campaignID))
+                string? campaignID = identity.Claims.FirstOrDefault(p => string.Equals(p.Type, "campaign", StringComparison.Ordinal))?.Value;
+                if (string.IsNullOrWhiteSpace(campaignID))
                     throw new ItemNotFoundException(ItemType.Campaign, string.Empty);
 
                 return campaignID;
             }
-            return null;
+            throw new InvalidOperationException("A campaign claim must be sent");
+        }
+
+        string GetUserName()
+        {
+            return HttpContext?.User?.Identity?.Name ?? throw new InvalidOperationException("A user claim must be sent");
         }
         #endregion
     }

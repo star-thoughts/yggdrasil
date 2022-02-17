@@ -15,10 +15,13 @@ namespace Yggdrasil.Server.Hubs
     {
         public override async Task OnConnectedAsync()
         {
-            if (Context.User.IsInRole(Roles.ManageUsers))
-                await Groups.AddToGroupAsync(Context.ConnectionId, Roles.ManageUsers);
-            if (Context.User.IsInRole(Roles.ManageUserPermissions))
-                await Groups.AddToGroupAsync(Context.ConnectionId, Roles.ManageUserPermissions);
+            if (Context?.User != null)
+            {
+                if (Context.User.IsInRole(Roles.ManageUsers))
+                    await Groups.AddToGroupAsync(Context.ConnectionId, Roles.ManageUsers);
+                if (Context.User.IsInRole(Roles.ManageUserPermissions))
+                    await Groups.AddToGroupAsync(Context.ConnectionId, Roles.ManageUserPermissions);
+            }
 
             await base.OnConnectedAsync();
         }

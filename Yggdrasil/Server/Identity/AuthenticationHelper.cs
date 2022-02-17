@@ -20,6 +20,11 @@ namespace Yggdrasil.Server.Identity
         /// <returns></returns>
         public static string GenerateJwtToken(ApplicationUser user, JwtConfiguration configuration, ApplicationRole[] availableRoles)
         {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+            if (configuration?.Key == null)
+                throw new ArgumentNullException(nameof(configuration));
+
             Dictionary<string, string> roleMap = availableRoles.ToDictionary(p => p.Id.ToString(), p => p.Name);
 
             List<Claim> claims = new List<Claim>
@@ -32,7 +37,7 @@ namespace Yggdrasil.Server.Identity
 
             foreach (string role in user.Roles)
             {
-                if (roleMap.TryGetValue(role, out string roleName))
+                if (roleMap.TryGetValue(role, out string? roleName))
                     claims.Add(new Claim(ClaimTypes.Role, roleName));
                 else
                     claims.Add(new Claim(ClaimTypes.Role, role));
@@ -63,6 +68,11 @@ namespace Yggdrasil.Server.Identity
         /// <returns></returns>
         public static string GenerateCampaignJwtToken(ApplicationUser user, JwtConfiguration configuration, string campaignID, ApplicationRole[] availableRoles, IEnumerable<string> campaignRoles)
         {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+            if (configuration?.Key == null)
+                throw new ArgumentNullException(nameof(configuration));
+
             Dictionary<string, string> roleMap = availableRoles.ToDictionary(p => p.Id.ToString(), p => p.Name);
 
             List<Claim> claims = new List<Claim>
@@ -76,7 +86,7 @@ namespace Yggdrasil.Server.Identity
 
             foreach (string role in user.Roles)
             {
-                if (roleMap.TryGetValue(role, out string roleName))
+                if (roleMap.TryGetValue(role, out string? roleName))
                     claims.Add(new Claim(ClaimTypes.Role, roleName));
                 else
                     claims.Add(new Claim(ClaimTypes.Role, role));

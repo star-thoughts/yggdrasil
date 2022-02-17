@@ -37,7 +37,7 @@ namespace Yggdrasil.Server.Identity
         /// <param name="userManager">Usermanager to get user from</param>
         /// <param name="userName">Name of the user to get</param>
         /// <returns>User identity information</returns>
-        public static ApplicationUser GetUser(this UserManager<ApplicationUser> userManager, string userName)
+        public static ApplicationUser? GetUser(this UserManager<ApplicationUser> userManager, string userName)
         {
             return userManager.Users.FirstOrDefault(p => p.NormalizedUserName == userName.ToUpperInvariant());
         }

@@ -29,8 +29,8 @@ namespace Yggdrasil.Server.Storage
         public ItemNotFoundException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            ItemType = (ItemType)info.GetValue("itemType", typeof(ItemType));
-            ItemID = (string)info.GetValue("itemID", typeof(string));
+            ItemType = (ItemType?)info.GetValue("itemType", typeof(ItemType)) ?? ItemType.Unknown;
+            ItemID = (string?)info.GetValue("itemID", typeof(string));
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Yggdrasil.Server.Storage
         /// <summary>
         /// Gets the ID of the item that was not found
         /// </summary>
-        public string ItemID { get; }
+        public string? ItemID { get; }
 
         /// <summary>
         /// Serializes the exception

@@ -16,17 +16,17 @@ namespace Yggdrasil.Server.Configuration
         /// <remarks>
         /// This is only when creating the identity database.  Once the database exists the account can be changed/removed/etc
         /// </remarks>
-        public string AdminAccount { get; set; }
+        public string? AdminAccount { get; set; }
         /// <summary>
         /// Gets or sets hte default admin password
         /// </summary>
         /// <remarks>
         /// This is only when creating the identity database.  Once the database exists the account can be changed/removed/etc
         /// </remarks>
-        public string AdminPassword { get; set; }
+        public string? AdminPassword { get; set; }
         /// <summary>
         /// Configuration information for using MongoDB as an identity database
         /// </summary>
-        public IdentityStorageConfiguration MongoDB { get; set; }
+        public IdentityStorageConfiguration? MongoDB { get; set; }
     }
 }

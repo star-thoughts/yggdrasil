@@ -6,6 +6,10 @@
     public enum ItemType
     {
         /// <summary>
+        /// Unknown or unset type
+        /// </summary>
+        Unknown,
+        /// <summary>
         /// Campaign item
         /// </summary>
         Campaign,

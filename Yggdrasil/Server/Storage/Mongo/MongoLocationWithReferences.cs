@@ -12,25 +12,29 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// Converts the data in this location into a <see cref="Location"/> object
         /// </summary>
         /// <returns>Location object</returns>
-        public Location ToLocation()
+        public Location ToLocation(string locationId)
         {
-            Location location = Location.ToLocation();
+            Location? location = Location?.ToLocation();
+            if (location == null)
+                throw new ItemNotFoundException(ItemType.Location, locationId);
+
             location.Parent = Parent?.ToLocationListItem();
-            location.ChildLocations = Children.Select(p => p.ToLocationListItem()).ToArray();
+            location.ChildLocations = Children?.Select(p => p.ToLocationListItem()).ToArray();
+
             return location;
         }
 
         /// <summary>
         /// Gets or sets the location
         /// </summary>
-        public MongoLocation Location { get; set; }
+        public MongoLocation? Location { get; set; }
         /// <summary>
         /// Gets or sets the parent reference
         /// </summary>
-        public MongoLocationReference Parent { get; set; }
+        public MongoLocationReference? Parent { get; set; }
         /// <summary>
         /// Gets or sets child references
         /// </summary>
-        public MongoLocationReference[] Children { get; set; }
+        public MongoLocationReference[]? Children { get; set; }
     }
 }

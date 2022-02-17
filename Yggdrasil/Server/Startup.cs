@@ -61,6 +61,9 @@ namespace Yggdrasil.Server
             JwtConfiguration jwtConfig = new JwtConfiguration();
             Configuration.Bind("Jwt", jwtConfig);
 
+            if (jwtConfig.Key == null)
+                throw new InvalidOperationException("A JWT Key must be specified.");
+
             services.Configure<JwtConfiguration>(Configuration.GetSection("Jwt"));
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -113,7 +116,7 @@ namespace Yggdrasil.Server
             },
             databaseOptions =>
             {
-                databaseOptions.ConnectionString = config.MongoDB.ConnectionString;
+                databaseOptions.ConnectionString = config.MongoDB?.ConnectionString;
                 databaseOptions.MigrationCollection = "yggdrasil_migration";
                 databaseOptions.RolesCollection = "yggdrasil_roles";
                 databaseOptions.UsersCollection = "yggdrasil_users";

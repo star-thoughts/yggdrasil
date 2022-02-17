@@ -13,11 +13,11 @@ namespace Yggdrasil.Server.Configuration
         /// <summary>
         /// Gets or sets the key-phrase to use for signing JWTs
         /// </summary>
-        public string Key { get; set; }
+        public string? Key { get; set; }
         /// <summary>
         /// Gets or sets the specified issuer of a JWT
         /// </summary>
-        public string Issuer { get; set; }
+        public string? Issuer { get; set; }
         /// <summary>
         /// Gets or sets the number of days before a token expires
         /// </summary>

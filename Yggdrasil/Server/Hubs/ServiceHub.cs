@@ -14,7 +14,7 @@ namespace Yggdrasil.Server.Hubs
     {
         public override async Task OnConnectedAsync()
         {
-            string campaignID = GetCampaignID();
+            string? campaignID = GetCampaignID();
 
             if (!string.IsNullOrWhiteSpace(campaignID))
             {
@@ -24,9 +24,9 @@ namespace Yggdrasil.Server.Hubs
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            string campaignID = GetCampaignID();
+            string? campaignID = GetCampaignID();
 
             if (!string.IsNullOrWhiteSpace(campaignID))
             {
@@ -41,9 +41,9 @@ namespace Yggdrasil.Server.Hubs
         /// Gets the ID of the campaign from the user's claims
         /// </summary>
         /// <returns>ID of the campaign, or null or empty if one is not found</returns>
-        string GetCampaignID()
+        string? GetCampaignID()
         {
-            if (Context.User.Identity is ClaimsIdentity identity)
+            if (Context?.User?.Identity is ClaimsIdentity identity)
             {
                 return identity.Claims.FirstOrDefault(p => string.Equals(p.Type, "campaign", StringComparison.Ordinal))?.Value;
             }
