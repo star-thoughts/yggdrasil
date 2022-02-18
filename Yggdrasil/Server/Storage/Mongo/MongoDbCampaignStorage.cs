@@ -443,26 +443,6 @@ namespace Yggdrasil.Server.Storage.Mongo
         }
 
         /// <summary>
-        /// Removes the given location from the database
-        /// </summary>
-        /// <param name="campaignId">ID of the campaign to remove</param>
-        /// <param name="locationId">ID of the location to remove</param>
-        /// <param name="cancellationToken">Token for cancelling the operation</param>
-        /// <returns>Task for asynchronous completion</returns>
-        /// <exception cref="ArgumentNullException">No campaign or location ID was specified</exception>
-        public async Task RemoveLocation(string campaignId, string locationId, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(campaignId))
-                throw new ArgumentNullException(nameof(campaignId));
-            if (string.IsNullOrWhiteSpace(locationId))
-                throw new ArgumentNullException(nameof(locationId));
-
-            IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
-
-            await collection.DeleteOneAsync(p => p.Id == locationId && p.CampaignId == campaignId, cancellationToken);
-        }
-
-        /// <summary>
         /// Updates location information
         /// </summary>
         /// <param name="campaignId">ID of the campaign containing the location</param>
@@ -552,7 +532,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// first to point to the parent of the location given in <paramref name="locationId"/>.  If <paramref name="relocateChildren"/> is false, then the children
         /// are "abandoned" and become root locations.
         /// </remarks>
-        public async Task<IEnumerable<Location>> DeleteLocation(string campaignId, string locationId, bool relocateChildren, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Location>> RemoveLocation(string campaignId, string locationId, bool relocateChildren, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));

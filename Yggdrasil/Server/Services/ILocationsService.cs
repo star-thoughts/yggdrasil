@@ -16,5 +16,37 @@ namespace Yggdrasil.Server.Services
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Details of the root locations in the campaign</returns>
         Task<LocationsList> GetRootLocations(string campaignId, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Gets the given location
+        /// </summary>
+        /// <param name="campaignId">ID of the campaign containing the location</param>
+        /// <param name="locationID">ID of the location</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Location data</returns>
+        Task<Location> GetLocation(string campaignId, string locationId, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Adds a new location to the campaign
+        /// </summary>
+        /// <param name="campaignId">ID of the campaign to add to</param>
+        /// <param name="editingUser">The user that is adding this location</param>
+        /// <param name="name">Name of the location to add</param>
+        /// <param name="description">Description of the location</param>
+        /// <param name="parent">The ID of the parent location</param>
+        /// <param name="population">Population data for the location</param>
+        /// <param name="tags">Tags to associate with the location</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>ID of the created location</returns>
+        Task<string> AddLocation(string campaignId, string editingUser, string name, string description, string parentId, Population population, string[] tags, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Removes the given location
+        /// </summary>
+        /// <param name="campaignId">ID of the campaign that has the location</param>
+        /// <param name="editingUser">User that is editing the campaign</param>
+        /// <param name="locationId">ID of the location</param>
+        /// <param name="relocateChildren">Whether or not to relocate children of this location to this location's parent</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
+        /// <exception cref="ArgumentNullException">A required parameter was not supplied</exception>
+        Task RemoveLocation(string campaignId, string editingUser, string locationId, bool relocateChildren, CancellationToken cancellationToken = default);
     }
 }

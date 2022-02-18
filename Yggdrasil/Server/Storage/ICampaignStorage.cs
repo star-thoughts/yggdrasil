@@ -133,10 +133,11 @@ namespace Yggdrasil.Server.Storage
         /// </summary>
         /// <param name="campaignId">ID of the campaign to remove</param>
         /// <param name="locationId">ID of the location to remove</param>
+        /// <param name="relocateChildren">Whether or not to relocate children of this location to this location's parent</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Task for asynchronous completion</returns>
         /// <exception cref="ArgumentNullException">No campaign or location ID was specified</exception>
-        Task RemoveLocation(string campaignId, string locationId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Location>> RemoveLocation(string campaignId, string locationId, bool relocateChildren, CancellationToken cancellationToken = default);
         /// <summary>
         /// Updates location information
         /// </summary>
@@ -157,20 +158,6 @@ namespace Yggdrasil.Server.Storage
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Location data</returns>
         Task<Location> GetLocation(string campaignId, string locationID, CancellationToken cancellationToken = default);
-        /// <summary>
-        /// Deletes the given location
-        /// </summary>
-        /// <param name="campaignId">ID of the campaign containing the location</param>
-        /// <param name="locationId">ID of the location</param>
-        /// <param name="relocateChildren">Whether or not to relocate the children to this location's parent</param>
-        /// <param name="cancellationToken">Token for cancelling the operation</param>
-        /// <returns>Collection of locations that were updated.  Does not include deleted location.</returns>
-        /// <remarks>
-        /// When a location is deleted, if <paramref name="relocateChildren"/> is true, then the child locations parent's are updated
-        /// first to point to the parent of the location given in <paramref name="locationId"/>.  If <paramref name="relocateChildren"/> is false, then the children
-        /// are "abandoned" and become root locations.
-        /// </remarks>
-        Task<IEnumerable<Location>> DeleteLocation(string campaignId, string locationId, bool relocateChildren, CancellationToken cancellationToken = default);
         /// <summary>
         /// Moves locations to a new parent, or to root
         /// </summary>

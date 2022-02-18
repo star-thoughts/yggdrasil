@@ -18,20 +18,17 @@ namespace Yggdrasil.Tests
         [Test]
         public void ConstructorNegativeTests()
         {
-            ArgumentException exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(null, Mock.Of<IHubContext<ServiceHub>>(), Mock.Of<IAuditStorage>()));
+            ArgumentException exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(null, null, Mock.Of<IAuditStorage>()));
             Assert.AreEqual("storage", exception.ParamName);
 
-            exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(Mock.Of<ICampaignStorage>(), null, Mock.Of<IAuditStorage>()));
-            Assert.AreEqual("hub", exception.ParamName);
-
-            exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(Mock.Of<ICampaignStorage>(), Mock.Of<IHubContext<ServiceHub>>(), null));
+            exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(Mock.Of<ICampaignStorage>(), null, null));
             Assert.AreEqual("auditor", exception.ParamName);
         }
 
         [Test]
         public void GetRootLocationsNegativeTests()
         {
-            LocationsService service = new LocationsService(Mock.Of<ICampaignStorage>(), Mock.Of<IHubContext<ServiceHub>>(), Mock.Of<IAuditStorage>());
+            LocationsService service = new LocationsService(Mock.Of<ICampaignStorage>(), null, Mock.Of<IAuditStorage>());
 
             ArgumentNullException exception = Assert.ThrowsAsync<ArgumentNullException>(() => service.GetRootLocations(null));
             Assert.AreEqual("campaignId", exception.ParamName);
@@ -42,7 +39,7 @@ namespace Yggdrasil.Tests
         {
             string campaignId = "campaign";
             Mock<ICampaignStorage> storage = new Mock<ICampaignStorage>();
-            LocationsService service = new LocationsService(storage.Object, Mock.Of<IHubContext<ServiceHub>>(), Mock.Of<IAuditStorage>());
+            LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
 
             storage.Setup(p => p.GetRootLocations(campaignId, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult((IEnumerable<LocationListItem>)Array.Empty<LocationListItem>()));
@@ -55,12 +52,16 @@ namespace Yggdrasil.Tests
         [Test]
         public void AddLocationNegativeTests()
         {
-            LocationsService service = new LocationsService(Mock.Of<ICampaignStorage>(), Mock.Of<IHubContext<ServiceHub>>(), Mock.Of<IAuditStorage>());
+            Mock<ICampaignStorage> storage = new Mock<ICampaignStorage>();
+            LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
+
+            storage.Setup(p => p.AddLocation(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Population>(), It.IsAny<string[]>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult((new Location() { Id = "1" })));
 
             ArgumentNullException exception = Assert.ThrowsAsync<ArgumentNullException>(() => service.AddLocation(null, "user", "name", "description", "parentId", null, Array.Empty<string>()));
             Assert.AreEqual("campaignId", exception.ParamName);
 
-            exception = Assert.ThrowsAsync<ArgumentNullException>(() => service.AddLocation("campaignId", null, "name", "description", "parentId", null, Array.Empty<string>()));
+            exception = Assert.ThrowsAsync<ArgumentNullException>(() => service.AddLocation("campaignId", "user", null, "description", "parentId", null, Array.Empty<string>()));
             Assert.AreEqual("name", exception.ParamName);
         }
 
@@ -69,7 +70,7 @@ namespace Yggdrasil.Tests
         {
             string campaignId = "campaign";
             Mock<ICampaignStorage> storage = new Mock<ICampaignStorage>();
-            LocationsService service = new LocationsService(storage.Object, Mock.Of<IHubContext<ServiceHub>>(), Mock.Of<IAuditStorage>());
+            LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
 
             storage.Setup(p => p.AddLocation(campaignId, "name", "description", "parentId", null, Array.Empty<string>(), CancellationToken.None))
                 .Returns(Task.FromResult(new Location() { Id = "1" }));

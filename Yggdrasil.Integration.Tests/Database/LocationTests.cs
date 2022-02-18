@@ -72,7 +72,7 @@ namespace Yggdrasil.Integration.Tests.Database
             Assert.IsNull(location.Parent);
 
             //  Cleanup
-            await _storage.DeleteLocation(campaignId, locationId, false);
+            await _storage.RemoveLocation(campaignId, locationId, false);
         }
 
 
@@ -155,8 +155,8 @@ namespace Yggdrasil.Integration.Tests.Database
             //  Check parent locations
             Assert.IsNull(parentLocation.Parent);
 
-            await _storage.DeleteLocation(campaignId, locationId, false);
-            await _storage.DeleteLocation(campaignId, parentId, false);
+            await _storage.RemoveLocation(campaignId, locationId, false);
+            await _storage.RemoveLocation(campaignId, parentId, false);
         }
 
         [TestCase(true)]
@@ -173,7 +173,7 @@ namespace Yggdrasil.Integration.Tests.Database
             string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
             string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
 
-            Location[] updated = (await _storage.DeleteLocation(campaignId, midId, moveToParent))
+            Location[] updated = (await _storage.RemoveLocation(campaignId, midId, moveToParent))
                 .ToArray();
 
             Location location = await _storage.GetLocation(campaignId, parentId);
@@ -198,10 +198,10 @@ namespace Yggdrasil.Integration.Tests.Database
                 Assert.IsNull(updated[1].ParentId);
             }
 
-            await _storage.DeleteLocation(campaignId, parentId, false);
-            await _storage.DeleteLocation(campaignId, midId, false);
-            await _storage.DeleteLocation(campaignId, child1Id, false);
-            await _storage.DeleteLocation(campaignId, child2Id, false);
+            await _storage.RemoveLocation(campaignId, parentId, false);
+            await _storage.RemoveLocation(campaignId, midId, false);
+            await _storage.RemoveLocation(campaignId, child1Id, false);
+            await _storage.RemoveLocation(campaignId, child2Id, false);
         }
 
         [Test]
@@ -242,10 +242,10 @@ namespace Yggdrasil.Integration.Tests.Database
 
             CollectionAssert.AreEquivalent(expectedChildIds, childIds);
 
-            await _storage.DeleteLocation(campaignId, parentId, false);
-            await _storage.DeleteLocation(campaignId, midId, false);
-            await _storage.DeleteLocation(campaignId, child1Id, false);
-            await _storage.DeleteLocation(campaignId, child2Id, false);
+            await _storage.RemoveLocation(campaignId, parentId, false);
+            await _storage.RemoveLocation(campaignId, midId, false);
+            await _storage.RemoveLocation(campaignId, child1Id, false);
+            await _storage.RemoveLocation(campaignId, child2Id, false);
         }
 
         [Test]
@@ -283,10 +283,10 @@ namespace Yggdrasil.Integration.Tests.Database
             Assert.AreEqual(1, parent.ChildLocations.Length);
             Assert.AreEqual(midId, parent.ChildLocations[0].Id);
 
-            await _storage.DeleteLocation(campaignId, parentId, false);
-            await _storage.DeleteLocation(campaignId, midId, false);
-            await _storage.DeleteLocation(campaignId, child1Id, false);
-            await _storage.DeleteLocation(campaignId, child2Id, false);
+            await _storage.RemoveLocation(campaignId, parentId, false);
+            await _storage.RemoveLocation(campaignId, midId, false);
+            await _storage.RemoveLocation(campaignId, child1Id, false);
+            await _storage.RemoveLocation(campaignId, child2Id, false);
         }
 
         [Test]
@@ -321,9 +321,9 @@ namespace Yggdrasil.Integration.Tests.Database
             CollectionAssert.AreEquivalent(rootLocationIds, locationIds);
 
             foreach (string id in rootLocationIds)
-                await _storage.DeleteLocation("campaign", id, false);
+                await _storage.RemoveLocation("campaign", id, false);
             foreach (string id in childLocationIds)
-                await _storage.DeleteLocation("campaign", id, false);
+                await _storage.RemoveLocation("campaign", id, false);
         }
     }
 }

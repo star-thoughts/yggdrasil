@@ -30,7 +30,7 @@ namespace Yggdrasil.Server.Controllers
     [Route("api/[controller]")]
     [Produces(MediaTypeNames.Application.Json)]
     [ResponseCache(CacheProfileName = "Default")]
-    public class CampaignsController : ControllerBase
+    public class CampaignsController : ControllerCore
     {
         /// <summary>
         /// Constructs a new <see cref="CampaignsController"/>
@@ -63,7 +63,7 @@ namespace Yggdrasil.Server.Controllers
         /// <summary>
         /// Gets a collection of all campaigns in the system
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A collection of campaign details</returns>
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetCampaigns()
@@ -299,29 +299,6 @@ namespace Yggdrasil.Server.Controllers
             _ = _hub.PlayerCharacterRemoved(campaignID, GetUserName(), id);
 
             return NoContent();
-        }
-        #endregion
-        #region Helpers
-        /// <summary>
-        /// Gets the ID of the campaign from the user's claims
-        /// </summary>
-        /// <returns>ID of the campaign, or null or empty if one is not found</returns>
-        string GetCampaignID()
-        {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
-            {
-                string? campaignID = identity.Claims.FirstOrDefault(p => string.Equals(p.Type, "campaign", StringComparison.Ordinal))?.Value;
-                if (string.IsNullOrWhiteSpace(campaignID))
-                    throw new ItemNotFoundException(ItemType.Campaign, string.Empty);
-
-                return campaignID;
-            }
-            throw new InvalidOperationException("A campaign claim must be sent");
-        }
-
-        string GetUserName()
-        {
-            return HttpContext?.User?.Identity?.Name ?? throw new InvalidOperationException("A user claim must be sent");
         }
         #endregion
     }
