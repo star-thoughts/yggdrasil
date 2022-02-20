@@ -12,7 +12,7 @@ namespace Yggdrasil.Integration.Tests.Database
 {
     public class LocationTests
     {
-        private ICampaignStorage? _storage;
+        private ICampaignStorage _storage;
 
         [SetUp]
         public async Task Setup()

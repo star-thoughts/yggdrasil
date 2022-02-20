@@ -10,6 +10,6 @@ namespace Yggdrasil.Models
         /// <summary>
         /// Gets the token to use for the campaign for the user
         /// </summary>
-        public string CamapignToken { get; set; }
+        public string? CamapignToken { get; set; }
     }
 }

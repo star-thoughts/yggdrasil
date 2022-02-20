@@ -79,19 +79,19 @@ namespace Yggdrasil.Server.Services
         /// <param name="tags">Tags to associate with the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>ID of the created location</returns>
-        public async Task<string> AddLocation(string campaignId, string editingUser, string name, string description, string parentId, Population population, string[] tags, CancellationToken cancellationToken = default)
+        public async Task<string> AddLocation(string campaignId, string editingUser, string name, string? description, string? parentId, Population? population, string[]? tags, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            Location location = await _storage.AddLocation(campaignId, name, description, parentId, population, tags, cancellationToken);
+            Location location = await _storage.AddLocation(campaignId, name, description, parentId, population, tags ?? Array.Empty<string>(), cancellationToken);
 
             if (_hub != null)
                 _ = _hub.LocationAdded(campaignId, editingUser, location);
 
-            return location.Id;
+            return location.Id ?? string.Empty;
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Yggdrasil.Server.Services
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Task for asynchronous completion</returns>
         /// <exception cref="ArgumentNullException">A required parameter was null or empty</exception>
-        public async Task UpdateLocation(string campaignId, string editingUser, string locationId, string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default)
+        public async Task UpdateLocation(string campaignId, string editingUser, string locationId, string? name, string? description, Population? population, string[]? tags, CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));

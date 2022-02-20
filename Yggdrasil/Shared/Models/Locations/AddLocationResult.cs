@@ -8,6 +8,6 @@
         /// <summary>
         /// Gets or sets the ID of the location that was added
         /// </summary>
-        public string Id { get; set; }
+        public string? Id { get; set; }
     }
 }

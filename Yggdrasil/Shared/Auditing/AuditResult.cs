@@ -8,6 +8,6 @@
         /// <summary>
         /// Gets or sets the resulting records
         /// </summary>
-        public AuditRecord[] Records { get; set; }
+        public AuditRecord[]? Records { get; set; }
     }
 }

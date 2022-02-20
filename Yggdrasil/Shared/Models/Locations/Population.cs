@@ -8,6 +8,6 @@
         /// <summary>
         /// Gets or sets a collection of entries containing different populations in the location
         /// </summary>
-        public PopulationEntry[] Populations { get; set; }
+        public PopulationEntry[]? Populations { get; set; }
     }
 }

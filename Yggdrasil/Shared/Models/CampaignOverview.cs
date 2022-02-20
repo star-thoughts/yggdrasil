@@ -14,18 +14,18 @@ namespace Yggdrasil.Models
         /// <summary>
         /// Gets or sets the ID of this campaign
         /// </summary>
-        public string ID { get; set; }
+        public string? ID { get; set; }
         /// <summary>
         /// Gets or sets the name of the campaign
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
         /// <summary>
         /// Gets or sets a short description for the campaign
         /// </summary>
-        public string ShortDescription { get; set; }
+        public string? ShortDescription { get; set; }
         /// <summary>
         /// Gets or sets the username for the dungeon master
         /// </summary>
-        public string DungeonMaster { get; set; }
+        public string? DungeonMaster { get; set; }
     }
 }

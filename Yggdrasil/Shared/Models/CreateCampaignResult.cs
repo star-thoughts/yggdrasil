@@ -14,6 +14,6 @@ namespace Yggdrasil.Models
         /// <summary>
         /// Gets or sets the ID of the campaign that was created
         /// </summary>
-        public string ID { get; set; }
+        public string? ID { get; set; }
     }
 }

@@ -11,6 +11,6 @@ namespace Yggdrasil.Models
         /// <summary>
         /// Gets a collection of players in the campaign
         /// </summary>
-        public IEnumerable<CampaignPlayerCharacter> Characters { get; set; }
+        public IEnumerable<CampaignPlayerCharacter>? Characters { get; set; }
     }
 }

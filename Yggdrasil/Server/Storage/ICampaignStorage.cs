@@ -126,7 +126,7 @@ namespace Yggdrasil.Server.Storage
         /// <param name="tags">Tags to associate with the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>ID of the created location</returns>
-        Task<Location> AddLocation(string campaignId, string name, string description, string? parentId, Population? population, string[] tags, CancellationToken cancellationToken = default);
+        Task<Location> AddLocation(string campaignId, string name, string? description, string? parentId, Population? population, string[] tags, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Removes the given location from the database
@@ -149,7 +149,7 @@ namespace Yggdrasil.Server.Storage
         /// <param name="tags">New tags for the location, or null not to update it</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Updated location data</returns>
-        Task<Location> UpdateLocation(string campaignId, string locationID, string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default);
+        Task<Location> UpdateLocation(string campaignId, string locationID, string? name, string? description, Population? population, string[]? tags, CancellationToken cancellationToken = default);
         /// <summary>
         /// Gets the given location
         /// </summary>

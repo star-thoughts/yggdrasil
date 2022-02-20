@@ -14,6 +14,6 @@ namespace Yggdrasil.Models.Locations
         /// <summary>
         /// Gets or sets a dictionary of locations as keys, and new parents as values
         /// </summary>
-        public Dictionary<string, string> Locations { get; set; }
+        public Dictionary<string, string>? Locations { get; set; }
     }
 }

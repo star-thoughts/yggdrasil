@@ -14,6 +14,6 @@ namespace Yggdrasil.Models
         /// <summary>
         /// Gets or sets a collection of campaigns in the system
         /// </summary>
-        public CampaignOverview[] Campaigns { get; set; }
+        public CampaignOverview[]? Campaigns { get; set; }
     }
 }

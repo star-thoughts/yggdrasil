@@ -11,11 +11,11 @@ namespace Yggdrasil.Auditing
         /// <remarks>
         /// This is the ID of the item of the type given in <see cref="RecordType"/>
         /// </remarks>
-        public string ItemID { get; set; }
+        public string? ItemID { get; set; }
         /// <summary>
         /// Type of audit record
         /// </summary>
-        public string RecordType { get; set; }
+        public string? RecordType { get; set; }
         /// <summary>
         /// Action performed in this audit record
         /// </summary>
@@ -23,7 +23,7 @@ namespace Yggdrasil.Auditing
         /// <summary>
         /// Gets the variables for this audit record
         /// </summary>
-        public Dictionary<string, string> Variables { get; set; }
+        public Dictionary<string, string>? Variables { get; set; }
         /// <summary>
         /// Gets the date/time of the audit record
         /// </summary>
@@ -31,10 +31,10 @@ namespace Yggdrasil.Auditing
         /// <summary>
         /// Gets the user associated with the audit record, if any
         /// </summary>
-        public string User { get; set; }
+        public string? User { get; set; }
         /// <summary>
         /// Gets or sets a value used to correlate multiple audit records to a single action
         /// </summary>
-        public string Correlation { get; set; }
+        public string? Correlation { get; set; }
     }
 }

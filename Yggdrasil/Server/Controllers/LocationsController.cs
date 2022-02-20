@@ -43,9 +43,9 @@ namespace Yggdrasil.Server.Controllers
         /// <returns>A list of locations that form the root of the world</returns>
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Roles.DungeonMaster)]
-        public async Task<LocationsList> GetRootLocations()
+        public async Task<IActionResult> GetRootLocations()
         {
-            return await _locationsService.GetRootLocations(GetCampaignID(), HttpContext.RequestAborted);
+            return Ok(await _locationsService.GetRootLocations(GetCampaignID(), HttpContext.RequestAborted));
         }
 
         /// <summary>
@@ -55,9 +55,9 @@ namespace Yggdrasil.Server.Controllers
         /// <returns>Location details</returns>
         [HttpGet("{locationId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Roles.DungeonMaster)]
-        public async Task<Location> GetLocation([Required] string locationId)
+        public async Task<IActionResult> GetLocation([Required] string locationId)
         {
-            return await _locationsService.GetLocation(GetCampaignID(), locationId, HttpContext.RequestAborted);
+            return Ok(await _locationsService.GetLocation(GetCampaignID(), locationId, HttpContext.RequestAborted));
         }
 
         /// <summary>
@@ -67,8 +67,11 @@ namespace Yggdrasil.Server.Controllers
         /// <returns>Result of the operation, with the ID of the newly created location's ID</returns>
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Roles.DungeonMaster)]
-        public async Task<AddLocationResult> AddLocation([Required] AddLocationData location)
+        public async Task<IActionResult> AddLocation([Required] AddLocationData location)
         {
+            if (string.IsNullOrWhiteSpace(location.Name))
+                return BadRequest();
+
             string id = await _locationsService.AddLocation(
                 GetCampaignID(),
                 GetUserName(),
@@ -79,7 +82,7 @@ namespace Yggdrasil.Server.Controllers
                 location.Tags,
                 HttpContext.RequestAborted);
 
-            return new AddLocationResult() { Id = id };
+            return Ok(new AddLocationResult() { Id = id });
         }
 
         /// <summary>
@@ -87,12 +90,25 @@ namespace Yggdrasil.Server.Controllers
         /// </summary>
         /// <param name="locationId">ID of the location to remove</param>
         /// <param name="relocateChildren">Whether or not to relocate children of this location to this location's parent</param>
-        /// <returns>Task for asynchronous completion</returns>
+        /// <returns>Result of the operation</returns>
         [HttpDelete("{locationId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Roles.DungeonMaster)]
         public async Task DeleteLocation([Required] string locationId, bool relocateChildren = true)
         {
-           await _locationsService.RemoveLocation(GetCampaignID(), GetUserName(), locationId, relocateChildren, HttpContext.RequestAborted);
+            await _locationsService.RemoveLocation(GetCampaignID(), GetUserName(), locationId, relocateChildren, HttpContext.RequestAborted);
+        }
+
+        /// <summary>
+        /// Updates a given location
+        /// </summary>
+        /// <param name="locationId">ID of the location to update</param>
+        /// <param name="data">Data to use to patch the location</param>
+        /// <returns>Result of the operation</returns>
+        [HttpPatch("{locationId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Roles.DungeonMaster)]
+        public async Task UpdateLocation([Required] string locationId, UpdateLocationData data)
+        {
+            await _locationsService.UpdateLocation(GetCampaignID(), GetUserName(), locationId, data.Name, data.Description, data.Population, data.Tags, HttpContext.RequestAborted);
         }
     }
 }

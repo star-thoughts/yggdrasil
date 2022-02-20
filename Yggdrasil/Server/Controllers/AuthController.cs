@@ -60,7 +60,7 @@ namespace Yggdrasil.Server.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([Required] RegisterRequest request)
         {
-            if (request == null)
+            if (string.IsNullOrWhiteSpace(request?.UserName))
                 throw new ArgumentNullException(nameof(request));
 
             ApplicationUser? appUser = new ApplicationUser() { UserName = request.UserName, IsVerified = false };
@@ -103,7 +103,7 @@ namespace Yggdrasil.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([Required, FromBody] LoginRequest info)
         {
-            if (info == null)
+            if (string.IsNullOrWhiteSpace(info.UserName))
                 return BadRequest();
 
             ApplicationUser? appUser = _userManager.GetUser(info.UserName);

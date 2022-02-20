@@ -10,6 +10,6 @@ namespace Yggdrasil.Identity
         /// <summary>
         /// Gets or sets a collection of users
         /// </summary>
-        public IEnumerable<UserInfo> Users { get; set; }
+        public IEnumerable<UserInfo>? Users { get; set; }
     }
 }

@@ -14,10 +14,10 @@ namespace Yggdrasil.Identity
         /// <summary>
         /// Gets or sets the username being registered
         /// </summary>
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
         /// <summary>
         /// Gets or sets the password being set
         /// </summary>
-        public string Password { get; set; }
+        public string? Password { get; set; }
     }
 }

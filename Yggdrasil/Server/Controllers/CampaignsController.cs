@@ -187,9 +187,9 @@ namespace Yggdrasil.Server.Controllers
 
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext?.User);
             ApplicationRole[] roles = _roleManager.Roles.ToArray();
-            string[] campaignRoles = campaign.Users.FirstOrDefault(p => string.Equals(p.UserName, user.UserName, StringComparison.OrdinalIgnoreCase))
+            string[] campaignRoles = campaign.Users?.FirstOrDefault(p => string.Equals(p.UserName, user.UserName, StringComparison.OrdinalIgnoreCase))
                 ?.Roles
-                .Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+                ?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 
             OpenCampaignResult result = new OpenCampaignResult();
             result.CamapignToken = AuthenticationHelper.GenerateCampaignJwtToken(user, _jwtConfig, campaignID, roles, campaignRoles);

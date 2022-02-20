@@ -14,6 +14,6 @@ namespace Yggdrasil.Models.Locations
         /// <summary>
         /// Gets or sets a collection of locations
         /// </summary>
-        public LocationListItem[] Locations { get; set; }
+        public LocationListItem[]? Locations { get; set; }
     }
 }

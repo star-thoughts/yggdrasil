@@ -132,7 +132,7 @@ namespace Yggdrasil.Server.Storage.Mongo
             FilterDefinition<MongoCampaign> filter = Builders<MongoCampaign>.Filter
                 .Eq(p => p.ID, objectID);
 
-            return await collection.Find(filter)
+            GetCampaignResult result = await collection.Find(filter)
                 .Limit(1)
                 .Project(p => new GetCampaignResult()
                 {
@@ -141,6 +141,11 @@ namespace Yggdrasil.Server.Storage.Mongo
                     Users = p.Users,
                 })
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            if (result == null)
+                throw new ItemNotFoundException(ItemType.Campaign, campaignID);
+
+            return result;
         }
 
         /// <summary>
@@ -418,7 +423,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <param name="tags">Tags to associate with the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>ID of the created location</returns>
-        public async Task<Location> AddLocation(string campaignId, string name, string description, string? parentId, Population? population, string[] tags, CancellationToken cancellationToken = default)
+        public async Task<Location> AddLocation(string campaignId, string name, string? description, string? parentId, Population? population, string[] tags, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
@@ -453,7 +458,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <param name="tags">New tags for the location, or null not to update it</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Updated location data</returns>
-        public async Task<Location> UpdateLocation(string campaignId, string locationID, string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default)
+        public async Task<Location> UpdateLocation(string campaignId, string locationID, string? name, string? description, Population? population, string[]? tags, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
