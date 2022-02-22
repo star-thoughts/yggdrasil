@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Yggdrasil.Models;
+using Yggdrasil.Models.Locations;
 
 namespace Yggdrasil.Client.Services
 {
@@ -72,6 +73,39 @@ namespace Yggdrasil.Client.Services
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Task for asynchronous completion</returns>
         Task RemoveCharacter(string characterID, CancellationToken cancellationToken = default);
+        #endregion
+        #region Locations
+        /// <summary>
+        /// Gets a list of root locations for the campaign
+        /// </summary>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Collection of location information for listing</returns>
+        Task<IEnumerable<LocationListItem>> GetRootLocations(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Creates a location and returns the new location's ID
+        /// </summary>
+        /// <param name="name">Name to give the location</param>
+        /// <param name="description">Optional description for the location</param>
+        /// <param name="population">Optional population data for the location</param>
+        /// <param name="tags">Optional tags for the location</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>ID of the new location</returns>
+        Task<string> CreateLocation(string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Gets all of the data for a location
+        /// </summary>
+        /// <param name="locationID">ID of the location to get</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Location's information</returns>
+        Task<Location> GetLocation(string locationID, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Deletes the given location from the campaign
+        /// </summary>
+        /// <param name="locationID">ID of the location to delete</param>
+        /// <param name="childrenHandling">Whether or not to relocate the children to this location's parent.  Otherwise they are deleted.</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
+        Task RemoveLocation(string locationID, HandleChildren childrenHandling, CancellationToken cancellationToken = default);
         #endregion
     }
 }
