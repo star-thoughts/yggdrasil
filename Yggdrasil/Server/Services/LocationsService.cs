@@ -100,18 +100,18 @@ namespace Yggdrasil.Server.Services
         /// <param name="campaignId">ID of the campaign that has the location</param>
         /// <param name="editingUser">User that is editing the campaign</param>
         /// <param name="locationId">ID of the location</param>
-        /// <param name="relocateChildren">Whether or not to relocate children of this location to this location's parent</param>
+        /// <param name="childrenHandling">Whether or not to relocate children of this location to this location's parent</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Task for asynchronous completion</returns>
         /// <exception cref="ArgumentNullException">A required parameter was not supplied</exception>
-        public async Task RemoveLocation(string campaignId, string editingUser, string locationId, bool relocateChildren, CancellationToken cancellationToken = default)
+        public async Task RemoveLocation(string campaignId, string editingUser, string locationId, HandleChildren childrenHandling, CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
             if (!string.IsNullOrWhiteSpace(locationId))
                 throw new ArgumentNullException(nameof(locationId));
 
-            await _storage.RemoveLocation(campaignId, locationId, relocateChildren, cancellationToken);
+            await _storage.RemoveLocation(campaignId, locationId, childrenHandling, cancellationToken);
 
             if (_hub != null)
                 _ = _hub.LocationRemoved(campaignId, editingUser, locationId);

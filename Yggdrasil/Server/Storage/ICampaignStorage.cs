@@ -133,11 +133,11 @@ namespace Yggdrasil.Server.Storage
         /// </summary>
         /// <param name="campaignId">ID of the campaign to remove</param>
         /// <param name="locationId">ID of the location to remove</param>
-        /// <param name="relocateChildren">Whether or not to relocate children of this location to this location's parent</param>
+        /// <param name="childrenHandling">Whether or not to relocate children of this location to this location's parent</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Task for asynchronous completion</returns>
         /// <exception cref="ArgumentNullException">No campaign or location ID was specified</exception>
-        Task<IEnumerable<Location>> RemoveLocation(string campaignId, string locationId, bool relocateChildren, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Location>> RemoveLocation(string campaignId, string locationId, HandleChildren childrenHandling, CancellationToken cancellationToken = default);
         /// <summary>
         /// Updates location information
         /// </summary>

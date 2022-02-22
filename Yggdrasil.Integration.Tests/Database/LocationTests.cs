@@ -72,7 +72,7 @@ namespace Yggdrasil.Integration.Tests.Database
             Assert.IsNull(location.Parent);
 
             //  Cleanup
-            await _storage.RemoveLocation(campaignId, locationId, false);
+            await _storage.RemoveLocation(campaignId, locationId, HandleChildren.MoveToRoot);
         }
 
 
@@ -155,13 +155,13 @@ namespace Yggdrasil.Integration.Tests.Database
             //  Check parent locations
             Assert.IsNull(parentLocation.Parent);
 
-            await _storage.RemoveLocation(campaignId, locationId, false);
-            await _storage.RemoveLocation(campaignId, parentId, false);
+            await _storage.RemoveLocation(campaignId, locationId, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, parentId, HandleChildren.MoveToRoot);
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task DeleteLocationsReparents(bool moveToParent)
+        [TestCase(HandleChildren.MoveToParent)]
+        [TestCase(HandleChildren.MoveToRoot)]
+        public async Task DeleteLocationsReparents(HandleChildren childrenHandling)
         {
             if (_storage == null)
                 throw new ArgumentNullException(nameof(_storage));
@@ -173,14 +173,14 @@ namespace Yggdrasil.Integration.Tests.Database
             string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
             string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
 
-            Location[] updated = (await _storage.RemoveLocation(campaignId, midId, moveToParent))
+            Location[] updated = (await _storage.RemoveLocation(campaignId, midId, childrenHandling))
                 .ToArray();
 
             Location location = await _storage.GetLocation(campaignId, parentId);
 
             Assert.IsNotNull(location);
             Assert.IsNotNull(location.ChildLocations);
-            if (moveToParent)
+            if (childrenHandling == HandleChildren.MoveToParent)
             {
                 Assert.AreEqual(2, location.ChildLocations.Length);
 
@@ -198,10 +198,10 @@ namespace Yggdrasil.Integration.Tests.Database
                 Assert.IsNull(updated[1].ParentId);
             }
 
-            await _storage.RemoveLocation(campaignId, parentId, false);
-            await _storage.RemoveLocation(campaignId, midId, false);
-            await _storage.RemoveLocation(campaignId, child1Id, false);
-            await _storage.RemoveLocation(campaignId, child2Id, false);
+            await _storage.RemoveLocation(campaignId, parentId, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, midId, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, child1Id, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, child2Id, HandleChildren.MoveToRoot);
         }
 
         [Test]
@@ -242,10 +242,10 @@ namespace Yggdrasil.Integration.Tests.Database
 
             CollectionAssert.AreEquivalent(expectedChildIds, childIds);
 
-            await _storage.RemoveLocation(campaignId, parentId, false);
-            await _storage.RemoveLocation(campaignId, midId, false);
-            await _storage.RemoveLocation(campaignId, child1Id, false);
-            await _storage.RemoveLocation(campaignId, child2Id, false);
+            await _storage.RemoveLocation(campaignId, parentId, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, midId, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, child1Id, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, child2Id, HandleChildren.MoveToRoot);
         }
 
         [Test]
@@ -283,10 +283,10 @@ namespace Yggdrasil.Integration.Tests.Database
             Assert.AreEqual(1, parent.ChildLocations.Length);
             Assert.AreEqual(midId, parent.ChildLocations[0].Id);
 
-            await _storage.RemoveLocation(campaignId, parentId, false);
-            await _storage.RemoveLocation(campaignId, midId, false);
-            await _storage.RemoveLocation(campaignId, child1Id, false);
-            await _storage.RemoveLocation(campaignId, child2Id, false);
+            await _storage.RemoveLocation(campaignId, parentId, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, midId, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, child1Id, HandleChildren.MoveToRoot);
+            await _storage.RemoveLocation(campaignId, child2Id, HandleChildren.MoveToRoot);
         }
 
         [Test]
@@ -321,9 +321,9 @@ namespace Yggdrasil.Integration.Tests.Database
             CollectionAssert.AreEquivalent(rootLocationIds, locationIds);
 
             foreach (string id in rootLocationIds)
-                await _storage.RemoveLocation("campaign", id, false);
+                await _storage.RemoveLocation("campaign", id, HandleChildren.MoveToRoot);
             foreach (string id in childLocationIds)
-                await _storage.RemoveLocation("campaign", id, false);
+                await _storage.RemoveLocation("campaign", id, HandleChildren.MoveToRoot);
         }
     }
 }

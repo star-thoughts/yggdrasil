@@ -89,13 +89,13 @@ namespace Yggdrasil.Server.Controllers
         /// Removes the given location from the campaign
         /// </summary>
         /// <param name="locationId">ID of the location to remove</param>
-        /// <param name="relocateChildren">Whether or not to relocate children of this location to this location's parent</param>
+        /// <param name="childrenHandling">Whether or not to relocate children of this location to this location's parent</param>
         /// <returns>Result of the operation</returns>
         [HttpDelete("{locationId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Roles.DungeonMaster)]
-        public async Task DeleteLocation([Required] string locationId, bool relocateChildren = true)
+        public async Task DeleteLocation([Required] string locationId, HandleChildren childrenHandling = HandleChildren.MoveToParent)
         {
-            await _locationsService.RemoveLocation(GetCampaignID(), GetUserName(), locationId, relocateChildren, HttpContext.RequestAborted);
+            await _locationsService.RemoveLocation(GetCampaignID(), GetUserName(), locationId, childrenHandling, HttpContext.RequestAborted);
         }
 
         /// <summary>

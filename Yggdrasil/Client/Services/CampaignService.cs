@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Yggdrasil.Client.Identity;
 using Yggdrasil.Models;
+using Yggdrasil.Models.Locations;
 
 namespace Yggdrasil.Client.Services
 {
@@ -29,6 +31,7 @@ namespace Yggdrasil.Client.Services
 
         private readonly ApiAuthenticationStateProvider _stateProvider;
 
+        #region Campaigns
         /// <summary>
         /// Gets a list of campaigns from the server
         /// </summary>
@@ -172,7 +175,8 @@ namespace Yggdrasil.Client.Services
                 return result;
             }
         }
-
+        #endregion Campaigns
+        #region Campaigns
         /// <summary>
         /// Gets the characters of the currently open campaign
         /// </summary>
@@ -273,5 +277,89 @@ namespace Yggdrasil.Client.Services
                 await CheckResponseForErrors(response);
             }
         }
+        #endregion Characters
+        #region Locations
+
+        /// <summary>
+        /// Gets a list of root locations for the campaign
+        /// </summary>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Collection of location information for listing</returns>
+        public async Task<IEnumerable<LocationListItem>> GetRootLocations(CancellationToken cancellationToken = default)
+        {
+            string uri = "api/campaigns/locations";
+
+            using (HttpResponseMessage response = await GetClient().GetAsync(uri, cancellationToken))
+            {
+                await CheckResponseForErrors(response);
+
+                return (await Deserialize<LocationsList>(response)).Locations?.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Creates a location and returns the new location's ID
+        /// </summary>
+        /// <param name="name">Name to give the location</param>
+        /// <param name="description">Optional description for the location</param>
+        /// <param name="population">Optional population data for the location</param>
+        /// <param name="tags">Optional tags for the location</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>ID of the new location</returns>
+        public async Task<string> CreateLocation(string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default)
+        {
+            string uri = "api/campaigns/locations";
+
+            AddLocationData data = new AddLocationData()
+            {
+                Name = name,
+                Description = description,
+                Population = population,
+                Tags = tags
+            };
+
+            using (HttpResponseMessage response = await GetClient().PostAsJsonAsync(uri, data, cancellationToken))
+            {
+                await CheckResponseForErrors(response);
+                return await Deserialize<string>(response);
+            }
+        }
+
+        /// <summary>
+        /// Gets all of the data for a location
+        /// </summary>
+        /// <param name="locationID">ID of the location to get</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Location's information</returns>
+        public async Task<Location> GetLocation(string locationID, CancellationToken cancellationToken = default)
+        {
+            string uri = $"api/campaigns/locations/{HttpUtility.UrlEncode(locationID)}";
+
+            using (HttpResponseMessage response = await GetClient().GetAsync(uri, cancellationToken))
+            {
+                await CheckResponseForErrors(response);
+                return await Deserialize<Location>(response);
+            }
+        }
+
+        /// <summary>
+        /// Deletes the given location from the campaign
+        /// </summary>
+        /// <param name="locationID">ID of the location to delete</param>
+        /// <param name="childrenHandling">Whether or not to relocate the children to this location's parent.  Otherwise they are deleted.</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
+        public async Task RemoveLocation(string locationID, HandleChildren childrenHandling, CancellationToken cancellationToken = default)
+        {
+            string uri = $"api/campaigns/locations/{HttpUtility.UrlEncode(locationID)}";
+
+            uri = QueryHelpers.AddQueryString(uri, "childrenHandling", childrenHandling.ToString());
+
+            using (HttpResponseMessage response = await GetClient().DeleteAsync(uri, cancellationToken))
+            {
+                await CheckResponseForErrors(response);
+            }
+        }
+        #endregion Locations
     }
 }

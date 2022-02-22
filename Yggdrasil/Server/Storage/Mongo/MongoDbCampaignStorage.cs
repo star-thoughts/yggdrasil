@@ -529,20 +529,22 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// </summary>
         /// <param name="campaignId">ID of the campaign containing the location</param>
         /// <param name="locationId">ID of the location</param>
-        /// <param name="relocateChildren">Whether or not to relocate the children to this location's parent</param>
+        /// <param name="childrenHandling">Whether or not to relocate the children to this location's parent</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Collection of locations that were updated.  Does not include deleted location.</returns>
         /// <remarks>
-        /// When a location is deleted, if <paramref name="relocateChildren"/> is true, then the child locations parent's are updated
-        /// first to point to the parent of the location given in <paramref name="locationId"/>.  If <paramref name="relocateChildren"/> is false, then the children
+        /// When a location is deleted, if <paramref name="childrenHandling"/> is true, then the child locations parent's are updated
+        /// first to point to the parent of the location given in <paramref name="locationId"/>.  If <paramref name="childrenHandling"/> is false, then the children
         /// are "abandoned" and become root locations.
         /// </remarks>
-        public async Task<IEnumerable<Location>> RemoveLocation(string campaignId, string locationId, bool relocateChildren, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Location>> RemoveLocation(string campaignId, string locationId, HandleChildren childrenHandling, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
             if (string.IsNullOrWhiteSpace(locationId))
                 throw new ArgumentNullException(nameof(locationId));
+            if (childrenHandling == HandleChildren.Unknown || childrenHandling == HandleChildren.Delete)
+                throw new ArgumentException(nameof(childrenHandling));
 
             IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
 
@@ -553,7 +555,14 @@ namespace Yggdrasil.Server.Storage.Mongo
 
             MongoLocation location = await collection.FindOneAndDeleteAsync(filter);
 
-            string? locationParent = relocateChildren ? location.ParentId : null;
+            string? locationParent = null;
+
+            switch (childrenHandling)
+            {
+                case HandleChildren.Delete: break;
+                case HandleChildren.MoveToRoot: break;
+                case HandleChildren.MoveToParent: locationParent = location.ParentId; break;
+            }
 
             IEnumerable<MongoLocation> updated = await RelocateLocationChildren(collection, campaignId, locationId, locationParent, cancellationToken);
 
