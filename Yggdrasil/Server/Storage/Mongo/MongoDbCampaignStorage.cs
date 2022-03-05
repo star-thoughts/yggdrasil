@@ -418,7 +418,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <param name="campaignId">ID of the campaign to add to</param>
         /// <param name="name">Name of the location to add</param>
         /// <param name="description">Description of the location</param>
-        /// <param name="parent">The ID of the parent location</param>
+        /// <param name="parentId">The ID of the parent location</param>
         /// <param name="population">Population data for the location</param>
         /// <param name="tags">Tags to associate with the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
@@ -511,8 +511,8 @@ namespace Yggdrasil.Server.Storage.Mongo
 
             MongoLocationWithReferences result = await collection.Aggregate()
                 .Match(filter)
-                .Project("{ _id: { \"$toString\": \"$_id\" }, parentId: { \"$toObjectId\": \"$ParentId\" }, \"Location\": \"$$ROOT\" }")
-                .Lookup(LocationsCollection, "parentId", "_id", "Parent")
+                .Project("{ _id: \"$_id\", parentId: \"$ParentId\", \"Location\": \"$$ROOT\" }")
+                .GraphLookup(collection, nameof(MongoLocation.ParentId), "_id", "$parentId", nameof(MongoLocationWithReferences.ParentsPath))
                 .Unwind("Parent", UnwindAndKeepNull)
                 .Lookup(LocationsCollection, "_id", "ParentId", nameof(MongoLocationWithReferences.Children))
                 .As<MongoLocationWithReferences>()

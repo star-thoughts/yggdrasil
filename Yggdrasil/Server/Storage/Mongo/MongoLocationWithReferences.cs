@@ -18,7 +18,7 @@ namespace Yggdrasil.Server.Storage.Mongo
             if (location == null)
                 throw new ItemNotFoundException(ItemType.Location, locationId);
 
-            location.Parent = Parent?.ToLocationListItem();
+            location.ParentsPath = ParentsPath?.Select(p => p.ToLocationListItem()).ToArray();
             location.ChildLocations = Children?.Select(p => p.ToLocationListItem()).ToArray();
 
             return location;
@@ -31,7 +31,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <summary>
         /// Gets or sets the parent reference
         /// </summary>
-        public MongoLocationReference? Parent { get; set; }
+        public MongoLocationReference[]? ParentsPath { get; set; }
         /// <summary>
         /// Gets or sets child references
         /// </summary>

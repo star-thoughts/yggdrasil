@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CE242C93
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yggdrasil.Tests", "Yggdrasil.Tests\Yggdrasil.Tests.csproj", "{05903331-11D3-4B0A-9262-9946C86674B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yggdrasil.Integration.Tests", "Yggdrasil.Integration.Tests\Yggdrasil.Integration.Tests.csproj", "{537FB3EB-B8CD-40EA-AF48-037364DD3A82}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yggdrasil.Integration.Tests", "Yggdrasil.Integration.Tests\Yggdrasil.Integration.Tests.csproj", "{537FB3EB-B8CD-40EA-AF48-037364DD3A82}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

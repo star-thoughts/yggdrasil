@@ -46,10 +46,12 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <summary>
         /// Gets or sets the ID of the parent
         /// </summary>
+        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
         public string? ParentId { get; set; }
         /// <summary>
         /// Gets or sets the ID of the campaign
         /// </summary>
+        [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
         public string? CampaignId { get; set; }
         /// <summary>
         /// Gets or sets the name of the location

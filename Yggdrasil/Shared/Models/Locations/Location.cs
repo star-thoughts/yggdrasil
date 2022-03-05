@@ -30,12 +30,12 @@
         /// </summary>
         public string[]? Tags { get; set; }
         /// <summary>
-        /// Gets or sets the parent location.  If null, then no parent information was included, but still may have a parent.
-        /// </summary>
-        public LocationListItem? Parent { get; set; }
-        /// <summary>
         /// Gets or sets immediate children locations.  If null or empty, no child information was included, but maystill have children.
         /// </summary>
         public LocationListItem[]? ChildLocations { get; set; }
+        /// <summary>
+        /// Gets or sets a collection of parent items.  The items are ordered from immediate parent to root parent.
+        /// </summary>
+        public LocationListItem[]? ParentsPath { get; set; }
     }
 }

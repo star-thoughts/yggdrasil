@@ -1,0 +1,6 @@
+﻿<div class="root-map-root">
+    @foreach(RootMapItem parent in Ancestors)
+    {
+        <div class="root-map-item"><span class="root-map-separator">/</span><a @onclick="(() => OnParentSelected(parent.AncestorId))">@parent.AncestorName</a></div>
+    }
+</div>

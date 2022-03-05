@@ -63,7 +63,14 @@ namespace Yggdrasil.Client.Shared
             if (authenticated)
             {
                 if (campaign)
-                    entries.Add(new NavBarEntry() { Icon = "travel_explore", Label = "Campaign", Address = "/campaign" });
+                {
+                    var campaignEntry = new NavBarEntry() { Icon = "travel_explore", Label = "Campaign", Address = "/campaign" };
+                    entries.Add(campaignEntry);
+                    campaignEntry.Children = new NavBarEntry[]
+                    {
+                        new NavBarEntry() { Label = "Locations", Address = "/locations" },
+                    };
+                }
                 if (user.IsInRole(Roles.ManageUsers))
                     entries.Add(new NavBarEntry() { Icon = "supervisor_account", Label = "Users", Address = "/users/manage" });
             }
