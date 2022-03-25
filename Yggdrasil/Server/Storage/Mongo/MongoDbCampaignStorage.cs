@@ -154,7 +154,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         /// <param name="campaignID">ID of the camapign to delete</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Task for asynchronous completion</returns>
-        public Task DeleteCampaign(string campaignID, CancellationToken cancellationToken = default)
+        public async Task DeleteCampaign(string campaignID, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(campaignID))
                 throw new ArgumentNullException(nameof(campaignID));
@@ -163,11 +163,17 @@ namespace Yggdrasil.Server.Storage.Mongo
                 throw new ArgumentException("CampaignID must translate to an ObjectID", nameof(campaignID));
 
             IMongoCollection<MongoCampaign> collection = GetDatabase().GetCollection<MongoCampaign>(CampaignsCollection);
+            IMongoCollection<MongoLocation> locationsCollection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
 
             FilterDefinition<MongoCampaign> filter = Builders<MongoCampaign>.Filter
                 .Eq(p => p.ID, objectID);
 
-            return collection.DeleteOneAsync(filter);
+            //  Clear out locations
+            FilterDefinition<MongoLocation> locationsFilter = Builders<MongoLocation>.Filter
+                .Eq(p => p.CampaignId, campaignID);
+            await locationsCollection.DeleteManyAsync(locationsFilter, cancellationToken);
+
+            await collection.DeleteOneAsync(filter, cancellationToken);
         }
         #endregion
         #region Player Characters

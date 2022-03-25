@@ -56,7 +56,7 @@ namespace Yggdrasil.Tests
             LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
 
             storage.Setup(p => p.AddLocation(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Population>(), It.IsAny<string[]>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult((new Location() { Id = "1" })));
+                .Returns(Task.FromResult((new Location() { ID = "1" })));
 
             ArgumentNullException exception = Assert.ThrowsAsync<ArgumentNullException>(() => service.AddLocation(null, "user", "name", "description", "parentId", null, Array.Empty<string>()));
             Assert.AreEqual("campaignId", exception.ParamName);
@@ -73,7 +73,7 @@ namespace Yggdrasil.Tests
             LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
 
             storage.Setup(p => p.AddLocation(campaignId, "name", "description", "parentId", null, Array.Empty<string>(), CancellationToken.None))
-                .Returns(Task.FromResult(new Location() { Id = "1" }));
+                .Returns(Task.FromResult(new Location() { ID = "1" }));
 
             string id = await service.AddLocation(campaignId, "user", "name", "description", "parentId", null, Array.Empty<string>());
             Assert.AreEqual("1", id);

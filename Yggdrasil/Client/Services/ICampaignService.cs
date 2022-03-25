@@ -85,12 +85,13 @@ namespace Yggdrasil.Client.Services
         /// Creates a location and returns the new location's ID
         /// </summary>
         /// <param name="name">Name to give the location</param>
+        /// <param name="parentId">ID of the location to put this location in</param>
         /// <param name="description">Optional description for the location</param>
         /// <param name="population">Optional population data for the location</param>
         /// <param name="tags">Optional tags for the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>ID of the new location</returns>
-        Task<string> CreateLocation(string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default);
+        Task<string> CreateLocation(string name, string parentId, string description, Population population, string[] tags, CancellationToken cancellationToken = default);
         /// <summary>
         /// Gets all of the data for a location
         /// </summary>
@@ -106,6 +107,17 @@ namespace Yggdrasil.Client.Services
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>Task for asynchronous completion</returns>
         Task RemoveLocation(string locationID, HandleChildren childrenHandling, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Updates the details of a given location.
+        /// </summary>
+        /// <param name="locationID">ID of the location to update</param>
+        /// <param name="name">Location's updated name</param>
+        /// <param name="description">Location's description</param>
+        /// <param name="population">Population details for the location</param>
+        /// <param name="tags">Tags to associate with the location</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
+        Task UpdateLocation(string locationID, string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default);
         #endregion
     }
 }

@@ -301,12 +301,13 @@ namespace Yggdrasil.Client.Services
         /// Creates a location and returns the new location's ID
         /// </summary>
         /// <param name="name">Name to give the location</param>
+        /// <param name="parentId">ID of the location to place this location in</param>
         /// <param name="description">Optional description for the location</param>
         /// <param name="population">Optional population data for the location</param>
         /// <param name="tags">Optional tags for the location</param>
         /// <param name="cancellationToken">Token for cancelling the operation</param>
         /// <returns>ID of the new location</returns>
-        public async Task<string> CreateLocation(string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default)
+        public async Task<string> CreateLocation(string name, string parentId, string description, Population population, string[] tags, CancellationToken cancellationToken = default)
         {
             string uri = "api/campaigns/locations";
 
@@ -315,7 +316,8 @@ namespace Yggdrasil.Client.Services
                 Name = name,
                 Description = description,
                 Population = population,
-                Tags = tags
+                Tags = tags,
+                ParentId = parentId,
             };
 
             using (HttpResponseMessage response = await GetClient().PostAsJsonAsync(uri, data, cancellationToken))
@@ -356,6 +358,33 @@ namespace Yggdrasil.Client.Services
             uri = QueryHelpers.AddQueryString(uri, "childrenHandling", childrenHandling.ToString());
 
             using (HttpResponseMessage response = await GetClient().DeleteAsync(uri, cancellationToken))
+            {
+                await CheckResponseForErrors(response);
+            }
+        }
+        /// <summary>
+        /// Updates the details of a given location.
+        /// </summary>
+        /// <param name="locationID">ID of the location to update</param>
+        /// <param name="name">Location's new name</param>
+        /// <param name="description">Location's description</param>
+        /// <param name="population">Population details for the location</param>
+        /// <param name="tags">Tags to associate with the location</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
+        public async Task UpdateLocation(string locationID, string name, string description, Population population, string[] tags, CancellationToken cancellationToken = default)
+        {
+            string uri = $"api/campaigns/locations/{HttpUtility.UrlEncode(locationID)}";
+
+            UpdateLocationData location = new UpdateLocationData()
+            {
+                Name = name,
+                Description = description,
+                Population = population,
+                Tags = tags
+            };
+
+            using (HttpResponseMessage response = await GetClient().PutAsJsonAsync(uri, location, cancellationToken))
             {
                 await CheckResponseForErrors(response);
             }

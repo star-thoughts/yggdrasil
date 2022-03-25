@@ -1,13 +1,4 @@
-﻿@page "/locations"
+﻿@page "/locations/{LocationID}"
 @using Yggdrasil.Client.Pages.Components
 
 <RootMap Ancestors="@Ancestors"></RootMap>
-
-@code{
-    RootMapItem[] Ancestors = new RootMapItem[]
-        {
-            new RootMapItem() { AncestorId = "1", AncestorName = "Root" },
-            new RootMapItem() { AncestorId = "2", AncestorName = "Middle" },
-            new RootMapItem() { AncestorId = "3", AncestorName = "Child" },
-        };
-}

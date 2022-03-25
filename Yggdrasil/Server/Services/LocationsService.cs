@@ -91,7 +91,7 @@ namespace Yggdrasil.Server.Services
             if (_hub != null)
                 _ = _hub.LocationAdded(campaignId, editingUser, location);
 
-            return location.Id ?? string.Empty;
+            return location.ID ?? string.Empty;
         }
 
         /// <summary>

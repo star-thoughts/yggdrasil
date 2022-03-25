@@ -50,7 +50,7 @@ namespace Yggdrasil.Integration.Tests.Database
 
             string campaignId = (await _storage.CreateCampaign("Me", "Campaign", "Location Test Campaign"));
             
-            string locationId = (await _storage.AddLocation(campaignId, locationName, description, null, population, tags)).Id;
+            string locationId = (await _storage.AddLocation(campaignId, locationName, description, null, population, tags)).ID;
 
             Location location = await _storage.GetLocation(campaignId, locationId);
 
@@ -106,8 +106,8 @@ namespace Yggdrasil.Integration.Tests.Database
 
             string campaignId = (await _storage.CreateCampaign("Me", "Campaign", "Location Test Campaign"));
 
-            string parentId = (await _storage.AddLocation(campaignId, parentLocationName, parentDescription, null, population, parentTags)).Id;
-            string locationId = (await _storage.AddLocation(campaignId, locationName, description, parentId, population, tags)).Id;
+            string parentId = (await _storage.AddLocation(campaignId, parentLocationName, parentDescription, null, population, parentTags)).ID;
+            string locationId = (await _storage.AddLocation(campaignId, locationName, description, parentId, population, tags)).ID;
 
             Location location = await _storage.GetLocation(campaignId, locationId);
 
@@ -175,10 +175,10 @@ namespace Yggdrasil.Integration.Tests.Database
 
             string campaignId = (await _storage.CreateCampaign("Me", "Campaign", "Location Test Campaign"));
 
-            string parentId = (await _storage.AddLocation(campaignId, "Test", "Test", null, null, Array.Empty<string>())).Id;
-            string midId = (await _storage.AddLocation(campaignId, "Test", "Test", parentId, null, Array.Empty<string>())).Id;
-            string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
-            string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
+            string parentId = (await _storage.AddLocation(campaignId, "Test", "Test", null, null, Array.Empty<string>())).ID;
+            string midId = (await _storage.AddLocation(campaignId, "Test", "Test", parentId, null, Array.Empty<string>())).ID;
+            string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
+            string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
 
             Location[] updated = (await _storage.RemoveLocation(campaignId, midId, childrenHandling))
                 .ToArray();
@@ -220,10 +220,10 @@ namespace Yggdrasil.Integration.Tests.Database
 
             string campaignId = (await _storage.CreateCampaign("Me", "Campaign", "Location Test Campaign"));
 
-            string parentId = (await _storage.AddLocation(campaignId, "Test", "Test", null, null, Array.Empty<string>())).Id;
-            string midId = (await _storage.AddLocation(campaignId, "Test", "Test", parentId, null, Array.Empty<string>())).Id;
-            string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
-            string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
+            string parentId = (await _storage.AddLocation(campaignId, "Test", "Test", null, null, Array.Empty<string>())).ID;
+            string midId = (await _storage.AddLocation(campaignId, "Test", "Test", parentId, null, Array.Empty<string>())).ID;
+            string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
+            string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
 
             Location[] updated = (await _storage.MoveLocations(campaignId, parentId, new string[] { child1Id, child2Id }))
                 .ToArray();
@@ -265,10 +265,10 @@ namespace Yggdrasil.Integration.Tests.Database
 
             string campaignId = (await _storage.CreateCampaign("Me", "Campaign", "Location Test Campaign"));
 
-            string parentId = (await _storage.AddLocation(campaignId, "Test", "Test", null, null, Array.Empty<string>())).Id;
-            string midId = (await _storage.AddLocation(campaignId, "Test", "Test", parentId, null, Array.Empty<string>())).Id;
-            string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
-            string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).Id;
+            string parentId = (await _storage.AddLocation(campaignId, "Test", "Test", null, null, Array.Empty<string>())).ID;
+            string midId = (await _storage.AddLocation(campaignId, "Test", "Test", parentId, null, Array.Empty<string>())).ID;
+            string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
+            string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
 
             Location[] updated = (await _storage.MoveLocations(campaignId, null, new string[] { child1Id, child2Id }))
                 .ToArray();
@@ -314,14 +314,14 @@ namespace Yggdrasil.Integration.Tests.Database
             await Task.WhenAll(rootLocationTasks);
 
             Task<Location>[] childLocationTasks = rootLocationTasks
-                .Select(p => _storage.AddLocation(campaignId, $"Child {p.Result}", "Description", p.Result.Id, null, Array.Empty<string>()))
+                .Select(p => _storage.AddLocation(campaignId, $"Child {p.Result}", "Description", p.Result.ID, null, Array.Empty<string>()))
                 .ToArray();
 
             await Task.WhenAll(childLocationTasks);
 
-            string[] rootLocationIds = rootLocationTasks.Select(p => p.Result.Id)
+            string[] rootLocationIds = rootLocationTasks.Select(p => p.Result.ID)
                 .ToArray();
-            string[] childLocationIds = childLocationTasks.Select(p => p.Result.Id)
+            string[] childLocationIds = childLocationTasks.Select(p => p.Result.ID)
                 .ToArray();
 
             LocationListItem[] locations = (await _storage.GetRootLocations(campaignId))
