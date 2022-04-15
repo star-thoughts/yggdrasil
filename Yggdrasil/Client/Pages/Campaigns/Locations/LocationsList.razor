@@ -1,0 +1,34 @@
+﻿@using Yggdrasil.Models.Locations
+
+<div class="control">
+    @if (IsBusy)
+    {
+        <Loading />
+    }
+    else if (Locations?.Any() == true)
+    {
+        <Listbox Items="@Locations" TItem="LocationListItem" OnItemDoubleClick="@(p => ItemDoubleClicked(p))">
+            <ItemTemplate>
+                <div class="location-item">
+                    <div class="name">@context.Name</div>
+                    @if (context.Tags?.Any() == true)
+                {
+                    <div class="tags label">Tags</div>
+                    <div class="tags text">
+                        <div class="tag-list">
+                            @foreach (string tag in context.Tags)
+                            {
+                                <div class="tag-list-item">@tag</div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </ItemTemplate>
+    </Listbox>
+    }
+    else
+    {
+        <div class="no-locations">No matching locations.</div>
+    }
+</div>

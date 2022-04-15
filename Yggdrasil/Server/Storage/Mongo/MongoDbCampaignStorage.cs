@@ -436,6 +436,10 @@ namespace Yggdrasil.Server.Storage.Mongo
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
+            //  Handle empty strings and such as parent ID
+            if (string.IsNullOrWhiteSpace(parentId))
+                parentId = null;
+
             IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
 
             MongoLocation location = new MongoLocation()

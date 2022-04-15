@@ -15,7 +15,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
     /// <summary>
     /// View for display information about a location
     /// </summary>
-    public partial class LocationsView
+    public partial class LocationView
     {
         /// <summary>
         /// Gets the service used to manage campaign information
@@ -37,6 +37,10 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         [Parameter]
         public string LocationID { get; set; }
         /// <summary>
+        /// Gets or sets whether the page is busy communicating with the server
+        /// </summary>
+        bool IsBusy { get; set; }
+        /// <summary>
         /// Gets or sets the location to view
         /// </summary>
         public LocationViewModel Location { get; set; }
@@ -50,8 +54,18 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         {
             if (!string.IsNullOrWhiteSpace(LocationID))
             {
-                Location location = await CampaignService.GetLocation(LocationID);
-                Location = new LocationViewModel(location, CampaignService);
+                IsBusy = true;
+                await InvokeAsync(StateHasChanged);
+                try
+                {
+                    Location location = await CampaignService.GetLocation(LocationID);
+                    Location = new LocationViewModel(location, CampaignService);
+                }
+                finally
+                {
+                    IsBusy = false;
+                    await InvokeAsync(StateHasChanged);
+                }
             }
             await base.OnInitializedAsync();
         }

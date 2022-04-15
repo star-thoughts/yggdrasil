@@ -19,13 +19,12 @@ namespace Yggdrasil.Server.Services
         /// </summary>
         /// <param name="storage">Interface to use for getting/storing data</param>
         /// <param name="hub">Hub for triggering events on clients</param>
-        /// <param name="auditor">Interface to use for auditing</param>
         /// <exception cref="ArgumentNullException">A parameter was null</exception>
-        public LocationsService(ICampaignStorage storage, IHubContext<ServiceHub>? hub, IAuditStorage auditor)
+        public LocationsService(ICampaignStorage storage, IHubContext<ServiceHub>? hub)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             _hub = hub;
-            _auditor = auditor ?? throw new ArgumentNullException(nameof(auditor));
+            _auditor = storage;
         }
 
         private readonly ICampaignStorage _storage;

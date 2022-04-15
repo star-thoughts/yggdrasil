@@ -1,0 +1,24 @@
+﻿@page "/location/{LocationID}"
+@using Yggdrasil.Client.Pages.Components
+
+<div class="page">
+    @if (Location != null)
+    {
+        <div class="root-map">
+            <RootMap Ancestors="@Ancestors"></RootMap>
+        </div>
+        <div class="location-data">
+            <div class="name label">Name</div>
+            <div class="details label">Description</div>
+            <div class="tags label">Tags</div>
+            <div class="children label">Label</div>
+            <div class="name text">@Location.Name</div>
+            <div class="details text">@Location.Description</div>
+            <div class="tags text">@string.Join(", ", Location.Tags)</div>
+            <div class="children text">@(string.Join(", ", Location.ChildLocations.Select(p => p.Name)))</div>
+            <div class="name edit"></div>
+            <div class="details edit"></div>
+            <div class="tags edit"></div>
+        </div>
+    }
+</div>

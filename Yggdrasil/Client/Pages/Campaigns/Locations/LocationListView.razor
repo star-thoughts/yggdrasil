@@ -1,0 +1,32 @@
+﻿@page "/locations"
+@using Yggdrasil.Client.Pages.Components
+@using Yggdrasil.Identity
+
+<AuthorizeView Roles="@Roles.DungeonMaster">
+    <Authorized>
+        <div class="page">
+            <div class="page-options">
+                <div class="option add">
+                    <Button OnClick="AddLocation">Add</Button>
+                </div>
+            </div>
+            <div class="location-root">
+                <RootMap Ancestors="@Ancestors" AncestorSelected="AncestorSelected"></RootMap>
+            </div>
+            @if (Location != null)
+            {
+                <div class="location">@Location.Name</div>
+            }
+            <div class="locationlist">
+                <LocationsList @ref="LocationList" @bind-LocationID="@LocationID" @bind-Location="@Location"></LocationsList>
+            </div>
+        </div>
+
+        <AddLocationDialog @ref="AddLocationDialog" />
+    </Authorized>
+    <NotAuthorized>
+        <UnauthorizedView />
+    </NotAuthorized>
+</AuthorizeView>
+
+<ExceptionDialog @ref="ExceptionDialog" />

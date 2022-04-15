@@ -93,6 +93,14 @@ namespace Yggdrasil.Client.ViewModels
                 _dirty = true;
             }
         }
+
+        /// <summary>
+        /// Gets whether or not the details of this location are valid to be saved
+        /// </summary>
+        public bool IsValid
+        {
+            get => !string.IsNullOrWhiteSpace(Name);
+        }
         /// <summary>
         /// Gets or sets immediate children locations.  If null or empty, no child information was included, but maystill have children.
         /// </summary>
@@ -106,7 +114,8 @@ namespace Yggdrasil.Client.ViewModels
             }
             else
             {
-                await _service.UpdateLocation(_location.ID, _location.Name, _location.Description, _location.Population, _location.Tags, cancellationToken);
+                if (IsDirty)
+                    await _service.UpdateLocation(_location.ID, _location.Name, _location.Description, _location.Population, _location.Tags, cancellationToken);
             }
         }
 
@@ -120,6 +129,7 @@ namespace Yggdrasil.Client.ViewModels
             if (string.Equals(location.ID, _location.ID))
             {
                 _location = location;
+                _dirty = false;
                 return true;
             }
             return false;

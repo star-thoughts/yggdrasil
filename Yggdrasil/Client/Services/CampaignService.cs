@@ -323,7 +323,7 @@ namespace Yggdrasil.Client.Services
             using (HttpResponseMessage response = await GetClient().PostAsJsonAsync(uri, data, cancellationToken))
             {
                 await CheckResponseForErrors(response);
-                return await Deserialize<string>(response);
+                return (await Deserialize<AddLocationResult>(response))?.Id;
             }
         }
 

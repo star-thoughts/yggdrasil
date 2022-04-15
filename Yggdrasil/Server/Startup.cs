@@ -18,6 +18,7 @@ using Yggdrasil.Server.Configuration;
 using Yggdrasil.Server.Hubs;
 using Yggdrasil.Server.Identity;
 using Yggdrasil.Server.MiddleWare;
+using Yggdrasil.Server.Services;
 using Yggdrasil.Server.Storage;
 using Yggdrasil.Server.Storage.Mongo;
 
@@ -51,6 +52,7 @@ namespace Yggdrasil.Server
         {
             services.Configure<StorageConfiguration>(Configuration.GetSection("Storage"));
             services.AddSingleton<ICampaignStorage, MongoDbCampaignStorage>();
+            services.AddSingleton<ILocationsService, LocationsService>();
         }
 
         private void ConfigureIdentity(IServiceCollection services)

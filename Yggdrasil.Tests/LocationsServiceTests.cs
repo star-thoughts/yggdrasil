@@ -18,17 +18,17 @@ namespace Yggdrasil.Tests
         [Test]
         public void ConstructorNegativeTests()
         {
-            ArgumentException exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(null, null, Mock.Of<IAuditStorage>()));
+            ArgumentException exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(null, null));
             Assert.AreEqual("storage", exception.ParamName);
 
-            exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(Mock.Of<ICampaignStorage>(), null, null));
+            exception = Assert.Throws<ArgumentNullException>(() => new LocationsService(Mock.Of<ICampaignStorage>(), null));
             Assert.AreEqual("auditor", exception.ParamName);
         }
 
         [Test]
         public void GetRootLocationsNegativeTests()
         {
-            LocationsService service = new LocationsService(Mock.Of<ICampaignStorage>(), null, Mock.Of<IAuditStorage>());
+            LocationsService service = new LocationsService(Mock.Of<ICampaignStorage>(), null);
 
             ArgumentNullException exception = Assert.ThrowsAsync<ArgumentNullException>(() => service.GetRootLocations(null));
             Assert.AreEqual("campaignId", exception.ParamName);
@@ -39,7 +39,7 @@ namespace Yggdrasil.Tests
         {
             string campaignId = "campaign";
             Mock<ICampaignStorage> storage = new Mock<ICampaignStorage>();
-            LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
+            LocationsService service = new LocationsService(storage.Object, null);
 
             storage.Setup(p => p.GetRootLocations(campaignId, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult((IEnumerable<LocationListItem>)Array.Empty<LocationListItem>()));
@@ -53,7 +53,7 @@ namespace Yggdrasil.Tests
         public void AddLocationNegativeTests()
         {
             Mock<ICampaignStorage> storage = new Mock<ICampaignStorage>();
-            LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
+            LocationsService service = new LocationsService(storage.Object, null);
 
             storage.Setup(p => p.AddLocation(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Population>(), It.IsAny<string[]>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult((new Location() { ID = "1" })));
@@ -70,7 +70,7 @@ namespace Yggdrasil.Tests
         {
             string campaignId = "campaign";
             Mock<ICampaignStorage> storage = new Mock<ICampaignStorage>();
-            LocationsService service = new LocationsService(storage.Object, null, Mock.Of<IAuditStorage>());
+            LocationsService service = new LocationsService(storage.Object, null);
 
             storage.Setup(p => p.AddLocation(campaignId, "name", "description", "parentId", null, Array.Empty<string>(), CancellationToken.None))
                 .Returns(Task.FromResult(new Location() { ID = "1" }));
