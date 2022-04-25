@@ -100,4 +100,17 @@ html, body, .containerbox {
 
 .section-block {
     box-shadow: 1px 1px 5px 0px black;
+    padding: 8px;
+}
+
+.section-grid{
+    display: grid;
+    grid-gap: 8px;
+    padding: 8px;
+}
+
+.link {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
 }

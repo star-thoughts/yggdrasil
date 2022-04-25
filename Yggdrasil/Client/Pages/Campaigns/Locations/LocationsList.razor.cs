@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Yggdrasil.Client.Models;
 using Yggdrasil.Client.Services;
+using Yggdrasil.Client.ViewModels;
 using Yggdrasil.Models.Locations;
 
 namespace Yggdrasil.Client.Pages.Campaigns.Locations
@@ -22,6 +25,8 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         NavigationManager NavigationManager { get; set; }
         [Inject]
         AuthenticationStateProvider AuthProvider { get; set; }
+        [Inject]
+        IJSRuntime JSRuntime { get; set; }
         /// <summary>
         /// Gets or sets global objects for the page
         /// </summary>
@@ -32,6 +37,11 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// </summary>
         [Parameter]
         public bool AutoLoad { get; set; } = true;
+        /// <summary>
+        /// Gets or sets whether the user can change locations by selecting a location
+        /// </summary>
+        [Parameter]
+        public bool CanChangeLocations { get; set; } = true;
         /// <summary>
         /// Gets or sets the parent location to display children for, or null to display root locations
         /// </summary>
@@ -57,17 +67,27 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// LocationID is empty (not-null), then root location updates will be shown here.
         /// </remarks>
         [Parameter]
-        public Location Location { get; set; }
+        public LocationViewModel Location { get; set; }
         /// <summary>
         /// Event that is triggered when the current <see cref="Location"/> changes
         /// </summary>
         [Parameter]
-        public EventCallback<Location> LocationChanged { get; set; }
+        public EventCallback<LocationViewModel> LocationChanged { get; set; }
         /// <summary>
         /// Gets or sets the locations to display.  If not set, then it is auto-populated with children of <see cref="LocationID"/>
         /// </summary>
         [Parameter]
         public IEnumerable<LocationListItem> Locations { get; set; }
+        /// <summary>
+        /// Gets or sets the selected location
+        /// </summary>
+        [Parameter]
+        public LocationListItem SelectedLocation { get; set; }
+        /// <summary>
+        /// Event that is triggered when the selected location changes
+        /// </summary>
+        [Parameter]
+        public EventCallback<LocationListItem> SelectedLocationChanged { get; set; }
         /// <summary>
         /// Gets or sets whether or not this control is busy loading information
         /// </summary>
@@ -112,9 +132,9 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// </summary>
         /// <param name="location">Location to navigate to</param>
         /// <returns>Task for asynchronous completion</returns>
-        public async Task NavigateTo(Location location)
+        public async Task NavigateTo(LocationViewModel location)
         {
-            LocationID = null;
+            LocationID = location?.Id;
             Location = location;
             Locations = null;
             await LoadLocations();
@@ -140,7 +160,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
 
         private async Task UpdateFromLocationID()
         {
-            Location = await CampaignService.GetLocation(LocationID);
+            Location = await LocationViewModel.Create(LocationID, CampaignService);
             await LocationChanged.InvokeAsync(Location);
             Locations = Location?.ChildLocations;
         }
@@ -182,7 +202,22 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
 
         async Task ItemDoubleClicked(LocationListItem location)
         {
-            await NavigateToLocation(location.Id);
+            if (CanChangeLocations)
+                await NavigateToLocation(location.Id);
+        }
+
+        async Task OnSelectedLocationChanged(LocationListItem location)
+        {
+            await SelectedLocationChanged.InvokeAsync(location);
+        }
+
+        async Task OpenLocation(string locationID, bool inNewWindow)
+        {
+            string uri = $"/location/{locationID}";
+            if (inNewWindow)
+                await JSRuntime.InvokeAsync<object>("open", new object[] { uri, "_blank" });
+            else
+                NavigationManager.NavigateTo(uri);
         }
     }
 }

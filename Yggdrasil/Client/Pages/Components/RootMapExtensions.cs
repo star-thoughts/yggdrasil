@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Yggdrasil.Client.ViewModels;
 using Yggdrasil.Models.Locations;
 
 namespace Yggdrasil.Client.Pages.Components
@@ -25,9 +26,9 @@ namespace Yggdrasil.Client.Pages.Components
         /// </summary>
         /// <param name="locations">List of locations to create a map from</param>
         /// <returns>List of root map items</returns>
-        public static IEnumerable<RootMapItem> ToRootMap(this Location location)
+        public static IEnumerable<RootMapItem> ToRootMap(this LocationViewModel location)
         {
-            IEnumerable<RootMapItem> items = location?.ParentsPath?.Reverse().ToRootMap() ?? Array.Empty<RootMapItem>();
+            IEnumerable<RootMapItem> items = location?.Ancestors?.Reverse().ToRootMap() ?? Array.Empty<RootMapItem>();
             items = new RootMapItem[] { new RootMapItem() { AncestorId = null, AncestorName = "Root" } }.Concat(items);
 
             return items;

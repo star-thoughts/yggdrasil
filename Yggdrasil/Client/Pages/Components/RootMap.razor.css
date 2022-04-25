@@ -6,12 +6,6 @@
     margin: 0px 8px 0px 8px;
 }
 
-.root-map-item div {
-    text-decoration: underline;
-    color: blue;
-    cursor: pointer;
-}
-
 .root-map-item:first-child .root-map-separator {
     margin: 0px 8px 0px 0px;
 }

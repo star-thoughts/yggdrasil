@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Yggdrasil.Client.Models;
 using Yggdrasil.Client.Pages.Components;
+using Yggdrasil.Client.Pages.Exceptions;
 using Yggdrasil.Client.Services;
 using Yggdrasil.Client.ViewModels;
 using Yggdrasil.Models.Locations;
@@ -47,19 +49,27 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// <summary>
         /// Gets the current location's ancestors
         /// </summary>
-        public IEnumerable<RootMapItem> Ancestors => Location?.Ancestors?.Select(p => new RootMapItem() { AncestorId = p.Id, AncestorName = p.Name })
-                ?? Array.Empty<RootMapItem>();
+        public IEnumerable<RootMapItem> Ancestors => Location?.Ancestors?.ToRootMap();
+
+        ExceptionDialog ExceptionDialog { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
-            if (!string.IsNullOrWhiteSpace(LocationID))
+            await LoadLocation(LocationID);
+            await base.OnInitializedAsync();
+        }
+
+        private async Task LoadLocation(string locationID)
+        {
+            if (IsValidLocationID(locationID))
             {
                 IsBusy = true;
                 await InvokeAsync(StateHasChanged);
                 try
                 {
-                    Location location = await CampaignService.GetLocation(LocationID);
+                    Location location = await CampaignService.GetLocation(locationID);
                     Location = new LocationViewModel(location, CampaignService);
+                    LocationID = locationID;
                 }
                 finally
                 {
@@ -67,7 +77,27 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
                     await InvokeAsync(StateHasChanged);
                 }
             }
-            await base.OnInitializedAsync();
+        }
+
+        async Task NavigateToLocation(string locationID)
+        {
+            if (IsValidLocationID(locationID))
+            {
+                try
+                {
+                    await LoadLocation(locationID);
+                    NavigationManager.NavigateTo($"/location/{HttpUtility.UrlEncode(locationID)}");
+                }
+                catch (Exception ex)
+                {
+                    await ExceptionDialog.Show(ex);
+                }
+            }
+        }
+
+        private bool IsValidLocationID(string locationID)
+        {
+            return !string.IsNullOrEmpty(locationID);
         }
     }
 }

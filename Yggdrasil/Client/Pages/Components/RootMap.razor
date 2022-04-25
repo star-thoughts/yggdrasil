@@ -3,7 +3,7 @@
     {
         foreach (RootMapItem parent in Ancestors)
         {
-            <div class="root-map-item"><span class="root-map-separator">/</span><div @onclick="(() => OnParentSelected(parent.AncestorId))">@parent.AncestorName</div></div>
+            <div class="root-map-item"><span class="root-map-separator">/</span><div class="link" @onclick="(() => OnParentSelected(parent.AncestorId))">@parent.AncestorName</div></div>
         }
     }
 </div>

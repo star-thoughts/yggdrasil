@@ -7,25 +7,27 @@
     }
     else if (Locations?.Any() == true)
     {
-        <Listbox Items="@Locations" TItem="LocationListItem" OnItemDoubleClick="@(p => ItemDoubleClicked(p))">
+        <Listbox Items="@Locations" TItem="LocationListItem" OnItemDoubleClick="@(p => ItemDoubleClicked(p))" SelectedItem="@SelectedLocation" SelectedItemChanged="OnSelectedLocationChanged">
             <ItemTemplate>
                 <div class="location-item">
                     <div class="name">@context.Name</div>
                     @if (context.Tags?.Any() == true)
-                {
-                    <div class="tags label">Tags</div>
-                    <div class="tags text">
-                        <div class="tag-list">
-                            @foreach (string tag in context.Tags)
-                            {
-                                <div class="tag-list-item">@tag</div>
-                            }
+                    {
+                        <div class="tags label">Tags</div>
+                        <div class="tags text">
+                            <div class="tag-list">
+                                @foreach (string tag in context.Tags)
+                                {
+                                    <div class="tag-list-item link">@tag</div>
+                                }
+                            </div>
                         </div>
-                    </div>
-                }
-            </div>
-        </ItemTemplate>
-    </Listbox>
+                    }
+                    <div class="location-open"><IconButton Icon="castle" OnClick="@(() => OpenLocation(context.Id, inNewWindow: false))" /></div>
+                    <div class="location-open-window"><IconButton Icon="zoom_in_map" OnClick="@(() => OpenLocation(context.Id, inNewWindow: true))" /></div>
+                </div>
+            </ItemTemplate>
+        </Listbox>
     }
     else
     {

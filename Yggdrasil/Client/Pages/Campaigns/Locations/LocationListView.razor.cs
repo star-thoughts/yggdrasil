@@ -7,6 +7,7 @@ using Yggdrasil.Client.Models;
 using Yggdrasil.Client.Pages.Components;
 using Yggdrasil.Client.Pages.Exceptions;
 using Yggdrasil.Client.Services;
+using Yggdrasil.Client.ViewModels;
 using Yggdrasil.Models.Locations;
 
 namespace Yggdrasil.Client.Pages.Campaigns.Locations
@@ -37,7 +38,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// <summary>
         /// Gets or sets the Location to display
         /// </summary>
-        Location Location { get; set; }
+        LocationViewModel Location { get; set; }
         /// <summary>
         /// Gets the control that display a list of locations
         /// </summary>
@@ -72,7 +73,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
             {
                 LocationID = itemID;
                 if (!string.IsNullOrWhiteSpace(LocationID))
-                    Location = await CampaignService.GetLocation(itemID);
+                    Location = await LocationViewModel.Create(itemID, CampaignService);
                 else
                     Location = null;
 

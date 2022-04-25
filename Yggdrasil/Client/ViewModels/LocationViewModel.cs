@@ -34,6 +34,10 @@ namespace Yggdrasil.Client.ViewModels
         /// </summary>
         public bool IsDirty { get => _dirty; }
         /// <summary>
+        /// Gets the ID of the location
+        /// </summary>
+        public string ID { get => _location.ID; }
+        /// <summary>
         /// Gets the name of the location
         /// </summary>
         public string Name
@@ -105,6 +109,19 @@ namespace Yggdrasil.Client.ViewModels
         /// Gets or sets immediate children locations.  If null or empty, no child information was included, but maystill have children.
         /// </summary>
         public IEnumerable<LocationListItem> ChildLocations { get => _location.ChildLocations; }
+
+        /// <summary>
+        /// Creates a view model based on the location ID
+        /// </summary>
+        /// <param name="locationID">ID of the location to get a view model for</param>
+        /// <param name="service">Service for communication with the server</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>View model representing the location</returns>
+        public static async Task<LocationViewModel> Create(string locationID, ICampaignService service, CancellationToken cancellationToken = default)
+        {
+            Location location = await service.GetLocation(locationID, cancellationToken);
+            return new LocationViewModel(location, service);
+        }
 
         public async Task Save(CancellationToken cancellationToken = default)
         {
