@@ -1,26 +1,34 @@
 ﻿@page "/location/{LocationID}"
 @using Yggdrasil.Client.Pages.Components
+@using Yggdrasil.Identity
 
 <div class="location-view containerbox section-grid">
-    @if (Location != null)
-    {
-        <div class="root-map section-block">
-            <RootMap Ancestors="@Ancestors" AncestorSelected="NavigateToLocation"></RootMap>
-        </div>
-        <div class="location-data containerbox section-block">
-            <div class="details label">Description</div>
-            <div class="tags label">Tags</div>
-            <div class="name text section-title">@Location.Name</div>
-            <div class="details text">@Location.Description</div>
-            <div class="tags text">@string.Join(", ", Location.Tags)</div>
-        </div>
-        <div class="location-children containerbox section-block">
-            <div class="children section-title">Children</div>
-            <div class="children">
-                <LocationsList Location="@Location" CanChangeLocations="false"></LocationsList>
+    <AuthorizeView Roles="@Roles.DungeonMaster">
+        <Authorized>
+        @if (Location != null)
+        {
+            <div class="root-map section-block">
+                <RootMap Ancestors="@Ancestors" AncestorSelected="NavigateToLocation"></RootMap>
             </div>
-        </div>
-    }
+            <div class="location-data containerbox section-block">
+                <div class="details label">Description</div>
+                <div class="tags label">Tags</div>
+                <div class="name text section-title">@Location.Name</div>
+                <div class="details text">@Location.Description</div>
+                <div class="tags text">@string.Join(", ", Location.Tags)</div>
+            </div>
+            <div class="location-children containerbox section-block">
+                <div class="children section-title">Children</div>
+                <div class="children">
+                    <LocationsList Location="@Location" CanChangeLocations="false"></LocationsList>
+                </div>
+            </div>
+        }
+        </Authorized>
+        <NotAuthorized>
+            <UnauthorizedView />
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 <ExceptionDialog @ref="ExceptionDialog" />

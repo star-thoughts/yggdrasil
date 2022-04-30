@@ -4,20 +4,20 @@
 
 <AuthorizeView Roles="@Roles.DungeonMaster">
     <Authorized>
-        <div class="page">
-            <div class="page-options">
+        <div class="page section-grid containerbox">
+            @if (Location != null)
+            {
+                <div class="location page-title">@Location.Name</div>
+            }
+            <div class="page-options section-block">
                 <div class="option add">
                     <Button OnClick="AddLocation">Add</Button>
                 </div>
             </div>
-            <div class="location-root">
+            <div class="location-root section-block">
                 <RootMap Ancestors="@Ancestors" AncestorSelected="AncestorSelected"></RootMap>
             </div>
-            @if (Location != null)
-            {
-                <div class="location">@Location.Name</div>
-            }
-            <div class="locationlist">
+            <div class="locationlist section-block">
                 <LocationsList @ref="LocationList" @bind-LocationID="@LocationID" @bind-Location="@Location"></LocationsList>
             </div>
         </div>

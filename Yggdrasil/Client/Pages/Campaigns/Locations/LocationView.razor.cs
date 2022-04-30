@@ -49,7 +49,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// <summary>
         /// Gets the current location's ancestors
         /// </summary>
-        public IEnumerable<RootMapItem> Ancestors => Location?.Ancestors?.ToRootMap();
+        public IEnumerable<RootMapItem> Ancestors => Location?.ToRootMap();
 
         ExceptionDialog ExceptionDialog { get; set; }
 

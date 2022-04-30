@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Yggdrasil.Client.ViewModels;
 
 namespace Yggdrasil.Client.Pages.Campaigns.Locations
 {
@@ -9,5 +10,9 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// </summary>
         [Parameter]
         public string ID { get; set; }
+        /// <summary>
+        /// Gets or sets the location to edit
+        /// </summary>
+        LocationViewModel Location { get; set; }
     }
 }

@@ -1,1 +1,26 @@
 ﻿@page "/editlocation/{ID}"
+@using Yggdrasil.Client.Pages.Components
+@using Yggdrasil.Identity
+
+<div class="edit-location-view containerbox section-grid">
+    <AuthorizeView Roles="@Roles.DungeonMaster">
+        <Authorized>
+            @if (Location != null)
+            {
+                <div class="section-block edit-section">
+                    <div class="name label">Name</div>
+                    <div class="name edit">
+                        <StringTextField Text="@Location.Name" IsRequired="true" IsImmediate="true" MaxLength="50" IsFixedWidth="false"></StringTextField>
+                    </div>
+                    <div class="description label">Description</div>
+                    <div class="description edit">
+                        <MultilineTextField Text="@Location.Description" IsImmediate="true" MaxLength="9999"></MultilineTextField>
+                    </div>
+                </div>
+            }
+        </Authorized>
+        <NotAuthorized>
+            <UnauthorizedView />
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
