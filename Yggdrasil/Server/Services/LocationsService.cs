@@ -105,9 +105,9 @@ namespace Yggdrasil.Server.Services
         /// <exception cref="ArgumentNullException">A required parameter was not supplied</exception>
         public async Task RemoveLocation(string campaignId, string editingUser, string locationId, HandleChildren childrenHandling, CancellationToken cancellationToken = default)
         {
-            if (!string.IsNullOrWhiteSpace(campaignId))
+            if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
-            if (!string.IsNullOrWhiteSpace(locationId))
+            if (string.IsNullOrWhiteSpace(locationId))
                 throw new ArgumentNullException(nameof(locationId));
 
             await _storage.RemoveLocation(campaignId, locationId, childrenHandling, cancellationToken);
@@ -131,9 +131,9 @@ namespace Yggdrasil.Server.Services
         /// <exception cref="ArgumentNullException">A required parameter was null or empty</exception>
         public async Task UpdateLocation(string campaignId, string editingUser, string locationId, string? name, string? description, Population? population, string[]? tags, CancellationToken cancellationToken = default)
         {
-            if (!string.IsNullOrWhiteSpace(campaignId))
+            if (string.IsNullOrWhiteSpace(campaignId))
                 throw new ArgumentNullException(nameof(campaignId));
-            if (!string.IsNullOrWhiteSpace(locationId))
+            if (string.IsNullOrWhiteSpace(locationId))
                 throw new ArgumentNullException(nameof(locationId));
 
             Location location = await _storage.UpdateLocation(campaignId, locationId, name, description, population, tags, cancellationToken);

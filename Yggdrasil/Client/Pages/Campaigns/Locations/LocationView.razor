@@ -14,7 +14,7 @@
                 <div class="details label">Description</div>
                 <div class="tags label">Tags</div>
                 <div class="name text section-title">@Location.Name</div>
-                <div class="details text">@Location.Description</div>
+                <div class="details text">@Description</div>
                 <div class="tags text">@string.Join(", ", Location.Tags)</div>
             </div>
             <div class="location-children containerbox section-block">
@@ -22,6 +22,9 @@
                 <div class="children">
                     <LocationsList Location="@Location" CanChangeLocations="false"></LocationsList>
                 </div>
+            </div>
+            <div class="page-options">
+                <Button OnClick="EditLocation">Edit</Button>
             </div>
         }
         </Authorized>

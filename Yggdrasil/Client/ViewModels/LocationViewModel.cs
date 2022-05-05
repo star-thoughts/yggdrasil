@@ -125,14 +125,17 @@ namespace Yggdrasil.Client.ViewModels
 
         public async Task Save(CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(_location.ID))
+            if (IsValid)
             {
-                await _service.CreateLocation(_location.Name, _location.ParentId, _location.Description, _location.Population, _location.Tags, cancellationToken);
-            }
-            else
-            {
-                if (IsDirty)
-                    await _service.UpdateLocation(_location.ID, _location.Name, _location.Description, _location.Population, _location.Tags, cancellationToken);
+                if (string.IsNullOrWhiteSpace(_location.ID))
+                {
+                    _location.ID = await _service.CreateLocation(_location.Name, _location.ParentId, _location.Description, _location.Population, _location.Tags, cancellationToken);
+                }
+                else
+                {
+                    if (IsDirty)
+                        await _service.UpdateLocation(_location.ID, _location.Name, _location.Description, _location.Population, _location.Tags, cancellationToken);
+                }
             }
         }
 

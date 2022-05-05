@@ -104,7 +104,7 @@ namespace Yggdrasil.Server.Controllers
         /// <param name="locationId">ID of the location to update</param>
         /// <param name="data">Data to use to patch the location</param>
         /// <returns>Result of the operation</returns>
-        [HttpPatch("{locationId}")]
+        [HttpPut("{locationId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = Roles.DungeonMaster)]
         public async Task UpdateLocation([Required] string locationId, UpdateLocationData data)
         {

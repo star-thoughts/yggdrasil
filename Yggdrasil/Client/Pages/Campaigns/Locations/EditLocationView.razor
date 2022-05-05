@@ -5,17 +5,24 @@
 <div class="edit-location-view containerbox section-grid">
     <AuthorizeView Roles="@Roles.DungeonMaster">
         <Authorized>
-            @if (Location != null)
+            @if (IsBusy && Location == null)
+            {
+                <Loading />
+            }
+            else if (Location != null)
             {
                 <div class="section-block edit-section">
                     <div class="name label">Name</div>
                     <div class="name edit">
-                        <StringTextField Text="@Location.Name" IsRequired="true" IsImmediate="true" MaxLength="50" IsFixedWidth="false"></StringTextField>
+                        <StringTextField @bind-Text="@Location.Name" IsRequired="true" IsImmediate="true" MaxLength="50" IsFixedWidth="false" IsEnabled="!IsBusy"></StringTextField>
                     </div>
                     <div class="description label">Description</div>
                     <div class="description edit">
-                        <MultilineTextField Text="@Location.Description" IsImmediate="true" MaxLength="9999"></MultilineTextField>
+                        <MultilineTextField @bind-Text="@Location.Description" IsImmediate="true" MaxLength="9999" IsFixedWidth="false" IsEnabled="!IsBusy"></MultilineTextField>
                     </div>
+                </div>
+                <div class="page-options">
+                    <Button OnClick="SaveLocation" IsEnabled="Location.IsValid && !IsBusy">Save</Button>
                 </div>
             }
         </Authorized>
@@ -24,3 +31,5 @@
         </NotAuthorized>
     </AuthorizeView>
 </div>
+
+<ExceptionDialog @ref="ExceptionDialog" />

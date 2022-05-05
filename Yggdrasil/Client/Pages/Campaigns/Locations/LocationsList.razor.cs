@@ -8,6 +8,7 @@ using Yggdrasil.Client.Models;
 using Yggdrasil.Client.Services;
 using Yggdrasil.Client.ViewModels;
 using Yggdrasil.Models.Locations;
+using Yggdrasil.Client.Pages.Components;
 
 namespace Yggdrasil.Client.Pages.Campaigns.Locations
 {
@@ -213,7 +214,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
 
         async Task OpenLocation(string locationID, bool inNewWindow)
         {
-            string uri = $"/location/{locationID}";
+            string uri = NavigationManager.GetLocationAddress(locationID);
             if (inNewWindow)
                 await JSRuntime.InvokeAsync<object>("open", new object[] { uri, "_blank" });
             else

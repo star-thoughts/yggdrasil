@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Markdig;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,11 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// </summary>
         public IEnumerable<RootMapItem> Ancestors => Location?.ToRootMap();
 
+        /// <summary>
+        /// Gets the description to display
+        /// </summary>
+        public MarkupString Description => (MarkupString)MarkdownHelper.ToHtml(Location?.Description);
+
         ExceptionDialog ExceptionDialog { get; set; }
 
         protected override async Task OnInitializedAsync()
@@ -86,7 +92,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
                 try
                 {
                     await LoadLocation(locationID);
-                    NavigationManager.NavigateTo($"/location/{HttpUtility.UrlEncode(locationID)}");
+                    NavigationManager.ViewLocation(locationID);
                 }
                 catch (Exception ex)
                 {
@@ -98,6 +104,12 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         private bool IsValidLocationID(string locationID)
         {
             return !string.IsNullOrEmpty(locationID);
+        }
+
+        void EditLocation()
+        {
+            if (IsValidLocationID(LocationID))
+                NavigationManager.EditLocation(LocationID);
         }
     }
 }

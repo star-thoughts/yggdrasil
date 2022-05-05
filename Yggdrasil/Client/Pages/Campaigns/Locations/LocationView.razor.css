@@ -1,5 +1,5 @@
 ﻿.location-view {
-    grid-template-rows: min-content 3fr 1fr;
+    grid-template-rows: min-content 3fr 1fr min-content;
 }
 
 .location-data {
@@ -38,4 +38,8 @@
     grid-row: 3;
     display: grid;
     grid-template-rows: min-content 1fr;
+}
+
+.page-options {
+    grid-row: 4;
 }
