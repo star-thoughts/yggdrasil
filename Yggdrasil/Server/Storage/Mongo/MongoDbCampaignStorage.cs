@@ -553,7 +553,7 @@ namespace Yggdrasil.Server.Storage.Mongo
                 throw new ArgumentNullException(nameof(campaignId));
             if (string.IsNullOrWhiteSpace(locationId))
                 throw new ArgumentNullException(nameof(locationId));
-            if (childrenHandling == HandleChildren.Unknown || childrenHandling == HandleChildren.Delete)
+            if (childrenHandling == HandleChildren.Unknown)
                 throw new ArgumentException(nameof(childrenHandling));
 
             IMongoCollection<MongoLocation> collection = GetDatabase().GetCollection<MongoLocation>(LocationsCollection);
@@ -566,16 +566,19 @@ namespace Yggdrasil.Server.Storage.Mongo
             MongoLocation location = await collection.FindOneAndDeleteAsync(filter);
 
             string? locationParent = null;
+            IEnumerable<MongoLocation> updated = Array.Empty<MongoLocation>();
 
-            switch (childrenHandling)
+            if (childrenHandling == HandleChildren.Delete)
             {
-                case HandleChildren.Delete: break;
-                case HandleChildren.MoveToRoot: break;
-                case HandleChildren.MoveToParent: locationParent = location.ParentId; break;
+                updated = await DeleteLocationChildren(collection, campaignId, locationId, cancellationToken);
             }
+            else
+            {
+                if (childrenHandling == HandleChildren.MoveToParent)
+                    locationParent = location.ParentId;
 
-            IEnumerable<MongoLocation> updated = await RelocateLocationChildren(collection, campaignId, locationId, locationParent, cancellationToken);
-
+                updated = await RelocateLocationChildren(collection, campaignId, locationId, locationParent, cancellationToken);
+            }
             return updated.Select(p => p.ToLocation());
         }
 
@@ -630,6 +633,20 @@ namespace Yggdrasil.Server.Storage.Mongo
 
             foreach (MongoLocation location in locations)
                 location.ParentId = newParentId;
+
+            return locations;
+        }
+
+        private async Task<IEnumerable<MongoLocation>> DeleteLocationChildren(IMongoCollection<MongoLocation> collection, string campaignId, string locationId, CancellationToken cancellationToken)
+        {
+            FilterDefinition<MongoLocation> filter = Builders<MongoLocation>.Filter.And(
+                Builders<MongoLocation>.Filter.Eq(p => p.CampaignId, campaignId),
+                Builders<MongoLocation>.Filter.Eq(p => p.ParentId, locationId));
+
+            var locations = await collection.Find(filter)
+                .ToListAsync();
+
+            await collection.DeleteManyAsync(filter, cancellationToken);
 
             return locations;
         }

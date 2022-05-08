@@ -123,6 +123,11 @@ namespace Yggdrasil.Client.ViewModels
             return new LocationViewModel(location, service);
         }
 
+        /// <summary>
+        /// Saves the location's data
+        /// </summary>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
         public async Task Save(CancellationToken cancellationToken = default)
         {
             if (IsValid)
@@ -136,6 +141,20 @@ namespace Yggdrasil.Client.ViewModels
                     if (IsDirty)
                         await _service.UpdateLocation(_location.ID, _location.Name, _location.Description, _location.Population, _location.Tags, cancellationToken);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Deletes this location
+        /// </summary>
+        /// <param name="childrenHandling">How to handle children of this location</param>
+        /// <param name="cancellationToken">Token for cancelling the operation</param>
+        /// <returns>Task for asynchronous completion</returns>
+        public async Task Remove(HandleChildren childrenHandling, CancellationToken cancellationToken = default)
+        {
+            if (!string.IsNullOrWhiteSpace(_location.ID))
+            {
+                await _service.RemoveLocation(_location.ID, childrenHandling, cancellationToken);
             }
         }
 

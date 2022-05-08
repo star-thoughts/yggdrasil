@@ -22,6 +22,7 @@
                     </div>
                 </div>
                 <div class="page-options">
+                    <Button OnClick="RemoveLocation" IsEnabled="!IsBusy">Remove</Button>
                     <Button OnClick="SaveLocation" IsEnabled="Location.IsValid && !IsBusy">Save</Button>
                 </div>
             }

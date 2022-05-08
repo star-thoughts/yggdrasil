@@ -78,5 +78,25 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
                 await InvokeAsync(StateHasChanged);
             }
         }
+
+        async Task RemoveLocation()
+        {
+            IsBusy = true;
+            await InvokeAsync(StateHasChanged);
+            try
+            {
+                await Location.Remove(HandleChildren.Delete);
+                NavigationManager.ViewLocationList();
+            }
+            catch (Exception exc)
+            {
+                await ExceptionDialog.Show(exc);
+            }
+            finally
+            {
+                IsBusy = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
     }
 }

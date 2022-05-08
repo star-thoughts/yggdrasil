@@ -168,7 +168,7 @@ namespace Yggdrasil.Integration.Tests.Database
 
         [TestCase(HandleChildren.MoveToParent)]
         [TestCase(HandleChildren.MoveToRoot)]
-        public async Task DeleteLocationsReparents(HandleChildren childrenHandling)
+        public async Task DeleteLocationReparents(HandleChildren childrenHandling)
         {
             if (_storage == null)
                 throw new ArgumentNullException(nameof(_storage));
@@ -209,6 +209,37 @@ namespace Yggdrasil.Integration.Tests.Database
             await _storage.RemoveLocation(campaignId, midId, HandleChildren.MoveToRoot);
             await _storage.RemoveLocation(campaignId, child1Id, HandleChildren.MoveToRoot);
             await _storage.RemoveLocation(campaignId, child2Id, HandleChildren.MoveToRoot);
+            await _storage.DeleteCampaign(campaignId);
+        }
+
+        [Test]
+        public async Task DeleteLocationDeletesChildren()
+        {
+            if (_storage == null)
+                throw new ArgumentNullException(nameof(_storage));
+
+            string campaignId = (await _storage.CreateCampaign("Me", "Campaign", "Location Test Campaign"));
+
+            string parentId = (await _storage.AddLocation(campaignId, "Test", "Test", null, null, Array.Empty<string>())).ID;
+            string midId = (await _storage.AddLocation(campaignId, "Test", "Test", parentId, null, Array.Empty<string>())).ID;
+            string child1Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
+            string child2Id = (await _storage.AddLocation(campaignId, "Test", "Test", midId, null, Array.Empty<string>())).ID;
+
+            Location[] updated = (await _storage.RemoveLocation(campaignId, midId, HandleChildren.Delete))
+                .ToArray();
+
+            Location location = await _storage.GetLocation(campaignId, parentId);
+            LocationListItem[] locations = (await _storage.GetRootLocations(campaignId)).ToArray();
+
+            Assert.IsNotNull(location);
+            Assert.IsNotNull(location.ChildLocations);
+            Assert.AreEqual(0, location.ChildLocations.Length);
+            Assert.AreEqual(1, locations.Length);
+
+            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _storage.GetLocation(campaignId, child1Id));
+            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _storage.GetLocation(campaignId, child2Id));
+
+            await _storage.RemoveLocation(campaignId, parentId, HandleChildren.MoveToRoot);
             await _storage.DeleteCampaign(campaignId);
         }
 
