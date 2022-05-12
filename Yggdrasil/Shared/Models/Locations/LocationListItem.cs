@@ -8,7 +8,7 @@
         /// <summary>
         /// Gets or sets the ID of this location
         /// </summary>
-        public string? Id { get; set; }
+        public string? ID { get; set; }
         /// <summary>
         /// Gets or sets the name of this location
         /// </summary>

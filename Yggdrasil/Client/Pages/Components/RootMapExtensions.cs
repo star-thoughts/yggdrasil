@@ -18,7 +18,7 @@ namespace Yggdrasil.Client.Pages.Components
         /// <returns>List of root map items</returns>
         public static IEnumerable<RootMapItem> ToRootMap(this IEnumerable<LocationListItem> locations)
         {
-            return locations.Select(p => new RootMapItem() { AncestorId = p.Id, AncestorName = p.Name });
+            return locations.Select(p => new RootMapItem() { AncestorId = p.ID, AncestorName = p.Name });
         }
 
         /// <summary>

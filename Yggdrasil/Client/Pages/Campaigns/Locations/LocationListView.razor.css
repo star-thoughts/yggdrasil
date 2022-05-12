@@ -3,6 +3,16 @@
     grid-template-rows: min-content min-content 1fr min-content;
 }
 
+.page-title {
+    grid-row: 1;
+    display: flex;
+    justify-content: space-between;
+}
+
+.location-open {
+    grid-row: 1;
+}
+
 .page-options {
     grid-row: 4;
 }

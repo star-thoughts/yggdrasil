@@ -66,7 +66,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
             try
             {
                 await Location.Save();
-                NavigationManager.ViewLocation(Location.Id);
+                NavigationManager.ViewLocation(Location.ID);
             }
             catch (Exception exc)
             {

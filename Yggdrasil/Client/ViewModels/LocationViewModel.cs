@@ -34,10 +34,6 @@ namespace Yggdrasil.Client.ViewModels
         /// </summary>
         public bool IsDirty { get => _dirty; }
         /// <summary>
-        /// Gets the ID of the location
-        /// </summary>
-        public string ID { get => _location.ID; }
-        /// <summary>
         /// Gets the name of the location
         /// </summary>
         public string Name
@@ -52,7 +48,7 @@ namespace Yggdrasil.Client.ViewModels
         /// <summary>
         /// Gets or sets the ID of the location
         /// </summary>
-        public string Id
+        public string ID
         {
             get => _location.ID;
             set
@@ -175,6 +171,26 @@ namespace Yggdrasil.Client.ViewModels
         }
 
         /// <summary>
+        /// Checks to see if a new location is a child of this location
+        /// </summary>
+        /// <param name="location">Location to test</param>
+        /// <returns>Whether or not this location got a new child location</returns>
+        public bool LocationAdded(Location location)
+        {
+            if (string.Equals(_location.ID, location.ParentId, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine($"{location.Name} is a new child of {_location.Name} ({location.ID} == {_location.ParentId})");
+                _location.ChildLocations = _location.ChildLocations
+                    .Append(new LocationListItem() { ID = location.ID, Name = location.Name, Tags = location.Tags })
+                    .ToArray();
+
+                return true;
+            }
+            Console.WriteLine($"{location.Name} is NOT a new child of {_location.Name} ({location.ID} != {_location.ParentId})");
+            return false;
+        }
+
+        /// <summary>
         /// Attempts to update the location data for this view
         /// </summary>
         /// <param name="locations">Locations that were updated</param>
@@ -183,23 +199,23 @@ namespace Yggdrasil.Client.ViewModels
         public async Task<bool> TryUpdate(LocationsMoved locations, CancellationToken cancellationToken = default)
         {
             bool updated = false;
-            if (locations.Locations.TryGetValue(Id, out string locationId))
+            if (locations.Locations.TryGetValue(ID, out string locationId))
             {
                 Location updatedParent = await _service.GetLocation(locationId, cancellationToken);
                 if (updatedParent != null)
                 {
-                    _location.ParentsPath = new LocationListItem[] { new LocationListItem() { Id = updatedParent.ID, Name = updatedParent.Name, Tags = updatedParent.Tags } }.Concat(updatedParent.ParentsPath).ToArray();
+                    _location.ParentsPath = new LocationListItem[] { new LocationListItem() { ID = updatedParent.ID, Name = updatedParent.Name, Tags = updatedParent.Tags } }.Concat(updatedParent.ParentsPath).ToArray();
                     _location.ParentId = updatedParent.ParentId;
                     updated = true;
                 }
             }
 
             //  See if we need to update any children
-            string[] childIDs = ChildLocations.Select(p => p.Id).ToArray();
-            string[] locationsWithThisParent = locations.Locations.Where(p => string.Equals(Id, p.Value, StringComparison.OrdinalIgnoreCase))
+            string[] childIDs = ChildLocations.Select(p => p.ID).ToArray();
+            string[] locationsWithThisParent = locations.Locations.Where(p => string.Equals(ID, p.Value, StringComparison.OrdinalIgnoreCase))
                 .Select(p => p.Key)
                 .ToArray();
-            string[] locationsWithoutThisParent = locations.Locations.Where(p => !string.Equals(Id, p.Value, StringComparison.OrdinalIgnoreCase))
+            string[] locationsWithoutThisParent = locations.Locations.Where(p => !string.Equals(ID, p.Value, StringComparison.OrdinalIgnoreCase))
                 .Select(p => p.Key)
                 .ToArray();
 
@@ -213,10 +229,10 @@ namespace Yggdrasil.Client.ViewModels
                 {
                     string locationID = locationsToAdd[i];
                     Location location = await _service.GetLocation(locationID, cancellationToken);
-                    locationData[i] = new LocationListItem() { Id = locationID, Name = location.Name, Tags = location.Tags };
+                    locationData[i] = new LocationListItem() { ID = locationID, Name = location.Name, Tags = location.Tags };
                 }
 
-                _location.ChildLocations = ChildLocations.Where(p => !locationsToRemove.Contains(p.Id, StringComparer.OrdinalIgnoreCase))
+                _location.ChildLocations = ChildLocations.Where(p => !locationsToRemove.Contains(p.ID, StringComparer.OrdinalIgnoreCase))
                     .Concat(locationData)
                     .ToArray();
 

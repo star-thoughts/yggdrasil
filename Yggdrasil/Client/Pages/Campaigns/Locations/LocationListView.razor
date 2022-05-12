@@ -7,7 +7,10 @@
         <div class="page section-grid containerbox">
             @if (Location != null)
             {
-                <div class="location page-title">@Location.Name</div>
+                <div class="location page-title">
+                    @Location.Name
+                    <div class="location-open"><IconButton Icon="castle" OnClick="@(() => OpenLocation(Location.ID))" /></div>
+                </div>
             }
             <div class="page-options section-block">
                 <div class="option add">
@@ -15,7 +18,7 @@
                 </div>
             </div>
             <div class="location-root section-block">
-                <RootMap Ancestors="@Ancestors" AncestorSelected="AncestorSelected"></RootMap>
+                <RootMap Ancestors="@Ancestors" AncestorSelected="MoveToAncestor"></RootMap>
             </div>
             <div class="locationlist section-block">
                 <LocationsList @ref="LocationList" @bind-LocationID="@LocationID" @bind-Location="@Location"></LocationsList>

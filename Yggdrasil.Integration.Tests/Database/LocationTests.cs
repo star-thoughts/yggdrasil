@@ -131,7 +131,7 @@ namespace Yggdrasil.Integration.Tests.Database
             Assert.IsNotNull(location.ParentsPath);
             Assert.AreEqual(1, location.ParentsPath.Length);
             Assert.AreEqual(parentId, location.ParentId);
-            Assert.AreEqual(parentId, location.ParentsPath[0].Id);
+            Assert.AreEqual(parentId, location.ParentsPath[0].ID);
             Assert.AreEqual(parentLocationName, location.ParentsPath[0].Name);
             CollectionAssert.AreEqual(parentTags, location.ParentsPath[0].Tags);
 
@@ -153,7 +153,7 @@ namespace Yggdrasil.Integration.Tests.Database
             //  Check child locations
             Assert.IsNotNull(location.ChildLocations);
             Assert.AreEqual(1, parentLocation.ChildLocations.Length);
-            Assert.AreEqual(locationId, parentLocation.ChildLocations[0].Id);
+            Assert.AreEqual(locationId, parentLocation.ChildLocations[0].ID);
             Assert.AreEqual(locationName, parentLocation.ChildLocations[0].Name);
             CollectionAssert.AreEqual(tags, parentLocation.ChildLocations[0].Tags);
 
@@ -191,8 +191,8 @@ namespace Yggdrasil.Integration.Tests.Database
             {
                 Assert.AreEqual(2, location.ChildLocations.Length);
 
-                Assert.AreEqual(child1Id, location.ChildLocations[0].Id);
-                Assert.AreEqual(child2Id, location.ChildLocations[1].Id);
+                Assert.AreEqual(child1Id, location.ChildLocations[0].ID);
+                Assert.AreEqual(child2Id, location.ChildLocations[1].ID);
 
                 Assert.AreEqual(parentId, updated[0].ParentId);
                 Assert.AreEqual(parentId, updated[1].ParentId);
@@ -276,7 +276,7 @@ namespace Yggdrasil.Integration.Tests.Database
             Assert.IsNotNull(parent);
             Assert.IsNotNull(parent.ChildLocations);
             Assert.AreEqual(3, parent.ChildLocations.Length);
-            string[] childIds = parent.ChildLocations.Select(p => p.Id).ToArray();
+            string[] childIds = parent.ChildLocations.Select(p => p.ID).ToArray();
             string[] expectedChildIds = new string[] { child1Id, child2Id, midId };
 
             CollectionAssert.AreEquivalent(expectedChildIds, childIds);
@@ -321,7 +321,7 @@ namespace Yggdrasil.Integration.Tests.Database
             Assert.IsNotNull(parent);
             Assert.IsNotNull(parent.ChildLocations);
             Assert.AreEqual(1, parent.ChildLocations.Length);
-            Assert.AreEqual(midId, parent.ChildLocations[0].Id);
+            Assert.AreEqual(midId, parent.ChildLocations[0].ID);
 
             await _storage.RemoveLocation(campaignId, parentId, HandleChildren.MoveToRoot);
             await _storage.RemoveLocation(campaignId, midId, HandleChildren.MoveToRoot);
@@ -358,7 +358,7 @@ namespace Yggdrasil.Integration.Tests.Database
             LocationListItem[] locations = (await _storage.GetRootLocations(campaignId))
                 .ToArray();
 
-            string[] locationIds = locations.Select(p => p.Id)
+            string[] locationIds = locations.Select(p => p.ID)
                 .ToArray();
 
             CollectionAssert.AreEquivalent(rootLocationIds, locationIds);

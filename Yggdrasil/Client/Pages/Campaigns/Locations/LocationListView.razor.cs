@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Yggdrasil.Client.Models;
 using Yggdrasil.Client.Pages.Components;
@@ -15,7 +16,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
     /// <summary>
     /// View for managing a list of locations
     /// </summary>
-    public partial class LocationListView
+    public partial class LocationListView : IDisposable
     {
         /// <summary>
         /// Gets the service used to manage campaign information
@@ -54,6 +55,36 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         AddLocationDialog AddLocationDialog { get; set; }
         ExceptionDialog ExceptionDialog { get; set; }
 
+        protected override void OnInitialized()
+        {
+            if (Globals != null)
+            {
+                Globals.ServiceHub.LocationRemoved += ServiceHub_LocationRemoved;
+                Globals.ServiceHub.LocationsMoved += ServiceHub_LocationsMoved;
+                Globals.ServiceHub.LocationUpdated += ServiceHub_LocationUpdated;
+            }
+        }
+
+        private async void ServiceHub_LocationUpdated(object sender, HubClients.LocationEventArgs e)
+        {
+            if (Location.TryUpdate(e.Location))
+                await InvokeAsync(StateHasChanged);
+        }
+
+        private async void ServiceHub_LocationsMoved(object sender, HubClients.LocationMovedEventArgs e)
+        {
+            if (await Location.TryUpdate(e.LocationsMoved))
+                await InvokeAsync(StateHasChanged);
+        }
+
+        private async void ServiceHub_LocationRemoved(object sender, HubClients.ItemRemovedEventArgs e)
+        {
+            if (string.Equals(Location?.ID, e.ItemID, StringComparison.OrdinalIgnoreCase))
+            {
+                await MoveToAncestor(Location?.Ancestors?.FirstOrDefault()?.ID);
+            }
+        }
+
         /// <summary>
         /// Adds a new location as a child of the current LocationID, or to the root if LocationID is null or empty
         /// </summary>
@@ -63,11 +94,11 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
             string id = await AddLocationDialog.Show(CampaignService, LocationID);
             if (!string.IsNullOrWhiteSpace(id))
             {
-                NavigationManager.NavigateTo($"/editlocation/{id}");
+                NavigationManager.EditLocation(id);
             }
         }
 
-        async Task AncestorSelected(string itemID)
+        async Task MoveToAncestor(string itemID)
         {
             try
             {
@@ -88,6 +119,25 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
             {
                 await ExceptionDialog.Show(exc);
             }
+        }
+
+        /// <summary>
+        /// Disposes of this object
+        /// </summary>
+        public void Dispose()
+        {
+            if (Globals != null)
+            {
+                Globals.ServiceHub.LocationRemoved -= ServiceHub_LocationRemoved;
+                Globals.ServiceHub.LocationsMoved -= ServiceHub_LocationsMoved;
+                Globals.ServiceHub.LocationUpdated -= ServiceHub_LocationUpdated;
+            }
+        }
+
+        void OpenLocation(string locationID)
+        {
+            string uri = NavigationManager.GetLocationAddress(locationID);
+            NavigationManager.NavigateTo(uri);
         }
     }
 }

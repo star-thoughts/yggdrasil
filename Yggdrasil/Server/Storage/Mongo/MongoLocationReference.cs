@@ -16,7 +16,7 @@ namespace Yggdrasil.Server.Storage.Mongo
         {
             return new LocationListItem()
             {
-                Id = Id,
+                ID = Id,
                 Name = Name,
                 Tags = Tags,
             };

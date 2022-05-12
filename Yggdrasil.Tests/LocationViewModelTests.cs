@@ -27,14 +27,14 @@ namespace Yggdrasil.Tests
             await viewModel.TryUpdate(new LocationsMoved() { Locations = new Dictionary<string, string>() { { "LocationID", "NewParentID" } } });
 
             Assert.AreEqual(1, viewModel.Ancestors.Count());
-            Assert.AreEqual("NewParentID", viewModel.Ancestors.ElementAt(0).Id);
+            Assert.AreEqual("NewParentID", viewModel.Ancestors.ElementAt(0).ID);
         }
 
         [Test]
         public async Task TryUpdateLocationChildrenMovedInAndOut()
         {
             Location source = CreateTestLocation("LocationID", "ParentID");
-            source.ChildLocations = new LocationListItem[] { new LocationListItem() { Id = "OldChildID", Name = "Test", Tags = Array.Empty<string>() } };
+            source.ChildLocations = new LocationListItem[] { new LocationListItem() { ID = "OldChildID", Name = "Test", Tags = Array.Empty<string>() } };
             Mock<ICampaignService> service = new Mock<ICampaignService>();
             LocationViewModel viewModel = new LocationViewModel(source, service.Object);
 
@@ -44,7 +44,7 @@ namespace Yggdrasil.Tests
             await viewModel.TryUpdate(new LocationsMoved() { Locations = new Dictionary<string, string>() { { "NewChildID", "LocationID" }, { "OldChildID", "SomeOtherID" } } });
 
             Assert.AreEqual(1, viewModel.ChildLocations.Count());
-            Assert.AreEqual("NewChildID", viewModel.ChildLocations.ElementAt(0).Id);
+            Assert.AreEqual("NewChildID", viewModel.ChildLocations.ElementAt(0).ID);
         }
 
         Location CreateTestLocation(string ID, string parentID = default)
@@ -59,7 +59,7 @@ namespace Yggdrasil.Tests
                 Population = new Population(),
                 Tags = Array.Empty<string>(),
                 ParentsPath = parentID != null
-                    ? new LocationListItem[] { new LocationListItem() { Id = parentID, Name = "Parent", Tags = Array.Empty<string>() } }
+                    ? new LocationListItem[] { new LocationListItem() { ID = parentID, Name = "Parent", Tags = Array.Empty<string>() } }
                     : Array.Empty<LocationListItem>(),
             };
         }

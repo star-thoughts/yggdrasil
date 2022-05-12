@@ -9,13 +9,15 @@ using Yggdrasil.Client.Services;
 using Yggdrasil.Client.ViewModels;
 using Yggdrasil.Models.Locations;
 using Yggdrasil.Client.Pages.Components;
+using System;
+using System.Linq;
 
 namespace Yggdrasil.Client.Pages.Campaigns.Locations
 {
     /// <summary>
     /// Component for showing a list of locations
     /// </summary>
-    public partial class LocationsList
+    public partial class LocationsList : IDisposable
     {
         /// <summary>
         /// Gets the service used to manage campaign information
@@ -97,6 +99,81 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         protected override async Task OnInitializedAsync()
         {
             await LoadLocations();
+            if (Globals != null)
+            {
+                Globals.ServiceHub.LocationAdded += ServiceHub_LocationAdded;
+                Globals.ServiceHub.LocationRemoved += ServiceHub_LocationRemoved;
+                Globals.ServiceHub.LocationsMoved += ServiceHub_LocationsMoved;
+                Globals.ServiceHub.LocationUpdated += ServiceHub_LocationUpdated;
+            }
+        }
+
+        private async void ServiceHub_LocationUpdated(object sender, HubClients.LocationEventArgs e)
+        {
+            if (Location?.TryUpdate(e.Location) == true)
+                await InvokeAsync(StateHasChanged);
+        }
+
+        private async void ServiceHub_LocationsMoved(object sender, HubClients.LocationMovedEventArgs e)
+        {
+            if (Location != null)
+            {
+                if (await Location.TryUpdate(e.LocationsMoved))
+                    await InvokeAsync(StateHasChanged);
+            }
+        }
+
+        private async void ServiceHub_LocationRemoved(object sender, HubClients.ItemRemovedEventArgs e)
+        {
+            if (Location != null && AutoLoad)
+            {
+                string locationID = e.ItemID;
+
+                if (IsThisLocation(locationID))
+                {
+                    await HandleThisLocationRemoved();
+                }
+                else
+                {
+                    HandleChildRemoved(e.ItemID);
+                }
+            }
+        }
+
+        private bool IsThisLocation(string locationID)
+        {
+            return string.Equals(Location?.ID ?? LocationID, locationID, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task HandleThisLocationRemoved()
+        {
+            string parentID = Location?.Ancestors?.FirstOrDefault()?.ID;
+            if (string.IsNullOrEmpty(parentID))
+                await NavigateToRoot();
+            else
+                await NavigateToLocation(parentID);
+        }
+
+        private async void HandleChildRemoved(string itemID)
+        {
+            LocationListItem child = GetVisibleLocation(itemID);
+            if (child != null)
+            {
+                await LoadFromLocationID();
+            }
+        }
+
+        private LocationListItem GetVisibleLocation(string itemID)
+        {
+            return Locations?.FirstOrDefault(p => IsThisLocation(itemID) == true);
+        }
+
+        private async void ServiceHub_LocationAdded(object sender, HubClients.LocationEventArgs e)
+        {
+            if (IsThisLocation(e.Location.ParentId))
+            {
+                await LoadFromLocationID();
+            }
         }
 
         /// <summary>
@@ -135,7 +212,7 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         /// <returns>Task for asynchronous completion</returns>
         public async Task NavigateTo(LocationViewModel location)
         {
-            LocationID = location?.Id;
+            LocationID = location?.ID;
             Location = location;
             Locations = null;
             await LoadLocations();
@@ -187,24 +264,29 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
         {
             if (IsDifferentLocationID(locationID))
             {
-                Locations = null;
-                Location = null;
                 LocationID = locationID;
+                await LoadFromLocationID();
                 await LocationIDChanged.InvokeAsync(locationID);
-                await LocationChanged.InvokeAsync(null);
-                await LoadLocations();
             }
+        }
+
+        private async Task LoadFromLocationID()
+        {
+            Locations = null;
+            Location = null;
+            await LocationChanged.InvokeAsync(null);
+            await LoadLocations();
         }
 
         private bool IsDifferentLocationID(string locationID)
         {
-            return !string.Equals(LocationID, locationID, System.StringComparison.OrdinalIgnoreCase);
+            return !IsThisLocation(locationID);
         }
 
         async Task ItemDoubleClicked(LocationListItem location)
         {
             if (CanChangeLocations)
-                await NavigateToLocation(location.Id);
+                await NavigateToLocation(location.ID);
         }
 
         async Task OnSelectedLocationChanged(LocationListItem location)
@@ -219,6 +301,17 @@ namespace Yggdrasil.Client.Pages.Campaigns.Locations
                 await JSRuntime.InvokeAsync<object>("open", new object[] { uri, "_blank" });
             else
                 NavigationManager.NavigateTo(uri);
+        }
+
+        public void Dispose()
+        {
+            if (Globals != null)
+            {
+                Globals.ServiceHub.LocationAdded -= ServiceHub_LocationAdded;
+                Globals.ServiceHub.LocationRemoved -= ServiceHub_LocationRemoved;
+                Globals.ServiceHub.LocationsMoved -= ServiceHub_LocationsMoved;
+                Globals.ServiceHub.LocationUpdated -= ServiceHub_LocationUpdated;
+            }
         }
     }
 }
