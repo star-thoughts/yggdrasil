@@ -1,0 +1,13 @@
+﻿.page{
+    display: grid;
+    grid-template-rows: min-content 1fr;
+}
+
+.login-area {
+    display: grid;
+    grid-template-rows: 1fr min-content 1fr;
+}
+
+::deep.login-card{
+    grid-row: 2;
+}

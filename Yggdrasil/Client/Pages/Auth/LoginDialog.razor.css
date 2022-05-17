@@ -1,6 +1,0 @@
-﻿.login-dialog {
-    display: grid;
-    grid-template-rows: min-content min-content;
-    grid-row-gap: var(--Grid-Gap);
-    overflow-y: hidden;
-}

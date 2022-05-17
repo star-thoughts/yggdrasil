@@ -1,32 +1,5 @@
 ﻿@page "/campaign"
-@using Yggdrasil.Identity
 
-<AuthorizeView Context="auth">
-    <Authorized>
-        @if (!_loading)
-        {
-            <div class="campaign-view containerbox @RoleBasedLayout">
-                <div class="campaign-header section-block">
-                    <div class="page-title">Campaign</div>
-                    <div class="page-subtitle">@Campaign.Name</div>
-                    <div class="page-subtitle">@DungeonMaster</div>
-                    <div class="campaign-description">@Campaign.Overview</div>
-                </div>
-                <div class="player-list section-block containerbox">
-                    <div class="section-title">Characters</div>
-                    <PlayerCharacterList />
-                </div>
-            </div>
-        }
-        else
-        {
-            <Loading />
-        }
-    </Authorized>
-    <NotAuthorized>
-        <UnauthorizedView />
-    </NotAuthorized>
-</AuthorizeView>
-
-<MessageBox @ref="MessageBox" />
-<ExceptionDialog @ref="ExceptionDialog" />
+<div class="page">
+    <div class="page-title">@Campaign.Name</div>
+</div>

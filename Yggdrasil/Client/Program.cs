@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Radzen;
 using System;
 using System.Threading.Tasks;
 using Yggdrasil.Client.Identity;
 using Yggdrasil.Client.Services;
-using Fiction.Controls.Toast;
 
 namespace Yggdrasil.Client
 {
@@ -24,13 +24,14 @@ namespace Yggdrasil.Client
                     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", token);
             });
 
-            builder.Services.AddToastNotifications();
-
             builder.Services.AddScoped<ICampaignService, CampaignService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+
+            //  Radzen components
+            builder.Services.AddScoped<DialogService>();
 
             await builder.Build().RunAsync();
         }

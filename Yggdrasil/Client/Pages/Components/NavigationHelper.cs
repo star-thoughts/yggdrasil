@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Web;
+using Yggdrasil.Models;
 
 namespace Yggdrasil.Client.Pages.Components
 {
@@ -27,6 +28,16 @@ namespace Yggdrasil.Client.Pages.Components
         public static string GetLocationsAddress(this NavigationManager manager)
         {
             return $"/locations";
+        }
+
+        public static void ViewCampaign(this NavigationManager manager, string campaignID)
+        {
+            manager.NavigateTo("campaign");
+        }
+
+        public static void ViewCampaign(this NavigationManager manager, CampaignOverview campaign)
+        {
+            manager.ViewCampaign(campaign.ID);
         }
 
         /// <summary>

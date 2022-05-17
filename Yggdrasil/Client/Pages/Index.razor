@@ -1,42 +1,22 @@
 ﻿@page "/"
-@using Fiction.Controls
 @using Yggdrasil.Models
 @using Yggdrasil.Identity
-@using Yggdrasil.Client.Pages.Campaigns
 
 <AuthorizeView>
     <Authorized Context="user">
         <div class="page-campaignlist containerbox">
             <div class="page-title">Campaigns</div>
-            @if (!_loading)
-            {
-                <Listbox Class="campaignlist" Items="Campaigns" @bind-SelectedItem="@SelectedCampaign" OnItemDoubleClick="@(e => ViewCampaign(e))" TItem="CampaignOverview" Context="campaign">
-                    <ItemTemplate>
-                        <div class="campaign-info no-select">
+            <RadzenDataList class="campaignlist" Data="@Campaigns" TItem="CampaignOverview">
+                <Template Context="campaign">
+                    <RadzenCard class="campaign-card">
+                        <div class="campaign-overview" @onclick="@(_ => ViewCampaign(campaign))">
                             <div class="campaign-name">@campaign.Name</div>
-                            <div class="campaign-dm">@campaign.DungeonMaster</div>
                             <div class="campaign-description">@campaign.ShortDescription</div>
+                            <div class="campaign-dungeon-master">@campaign.DungeonMaster</div>
                         </div>
-                    </ItemTemplate>
-                </Listbox>
-                <div class="page-options">
-                    <AuthorizeView Roles="@Roles.ManageCampaigns">
-                        <Authorized>
-                            <Button OnClick="@(e => DeleteCampaign(SelectedCampaign))" IsEnabled="SelectedCampaign != null">Delete</Button>
-                        </Authorized>
-                    </AuthorizeView>
-                    <Button OnClick="@(e => ViewCampaign(SelectedCampaign))" IsEnabled="SelectedCampaign != null">View</Button>
-                    <AuthorizeView Roles="@Roles.CreateCampaign">
-                        <Authorized>
-                            <Button OnClick="CreateCampaign">Create</Button>
-                        </Authorized>
-                    </AuthorizeView>
-                </div>
-            }
-            else  //  Show loading screen until campaigns are loaded
-            {
-                <Loading />
-            }
+                    </RadzenCard>
+                </Template>
+            </RadzenDataList>
         </div>
     </Authorized>
     <NotAuthorized>
@@ -44,6 +24,3 @@
     </NotAuthorized>
 </AuthorizeView>
 
-<ExceptionDialog @ref="ExceptionDialog" />
-<CampaignDetailsDialog @ref="CampaignDetailsDialog" />
-<MessageBox @ref="MessageBox" />

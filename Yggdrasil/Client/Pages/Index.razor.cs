@@ -1,15 +1,14 @@
-﻿using Fiction.Controls.Dialog;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Radzen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Yggdrasil.Client.Models;
-using Yggdrasil.Client.Pages.Campaigns;
-using Yggdrasil.Client.Pages.Exceptions;
 using Yggdrasil.Client.Services;
 using Yggdrasil.Models;
+using Yggdrasil.Client.Pages.Components;
 
 namespace Yggdrasil.Client.Pages
 {
@@ -18,6 +17,8 @@ namespace Yggdrasil.Client.Pages
     /// </summary>
     public sealed partial class Index : IDisposable
     {
+        [Inject]
+        DialogService DialogService { get; set; }
         /// <summary>
         /// Gets the service used to manage campaign information
         /// </summary>
@@ -35,11 +36,7 @@ namespace Yggdrasil.Client.Pages
         /// </summary>
         List<CampaignOverview> Campaigns { get; set; }
         CampaignOverview SelectedCampaign { get; set; }
-        bool _loading = true;
 
-        ExceptionDialog ExceptionDialog;
-        CampaignDetailsDialog CampaignDetailsDialog;
-        MessageBox MessageBox;
 
         protected override async Task OnInitializedAsync()
         {
@@ -60,27 +57,23 @@ namespace Yggdrasil.Client.Pages
             Campaigns = new List<CampaignOverview>();
             if (authenticated)
             {
-                try
+                await using (await Globals.GetBusyView().BeginOperation())
                 {
-                    _loading = true;
-                    await InvokeAsync(StateHasChanged);
+                    try
+                    {
+                        Campaigns = GetOrderedCampaigns((await CampaignService.GetCampaigns()).Campaigns);
+                        Globals.ServiceHub.CampaignUpdated += ServiceHub_CampaignUpdated;
+                        Globals.ServiceHub.CampaignAdded += ServiceHub_CampaignUpdated;
+                        Globals.ServiceHub.CampaignRemoved += ServiceHub_CampaignRemoved;
+                    }
+                    catch (Exception exc)
+                    {
+                        await DialogService.MessageBoxAsync("Error Loading Campaigns", exc.Message, MessageBoxType.Close);
+                    }
 
-                    Campaigns = GetOrderedCampaigns((await CampaignService.GetCampaigns()).Campaigns);
-                    Globals.ServiceHub.CampaignUpdated += ServiceHub_CampaignUpdated;
-                    Globals.ServiceHub.CampaignAdded += ServiceHub_CampaignUpdated;
-                    Globals.ServiceHub.CampaignRemoved += ServiceHub_CampaignRemoved;
-                }
-                catch (Exception exc)
-                {
-                    await ExceptionDialog.Show(exc);
-                }
-                finally
-                {
-                    _loading = false;
+                    await InvokeAsync(StateHasChanged);
                 }
             }
-
-            await InvokeAsync(StateHasChanged);
         }
 
         static List<CampaignOverview> GetOrderedCampaigns(IEnumerable<CampaignOverview> campaigns)
@@ -121,32 +114,32 @@ namespace Yggdrasil.Client.Pages
                 await CampaignService.OpenCampaign(campaignID);
                 NavigationManager.NavigateTo($"campaign");
             }
-            catch (Exception exc)
+            catch (Exception)
             {
-                await ExceptionDialog.Show(exc);
+                
             }
         }
 
-        async void CreateCampaign()
+        void CreateCampaign()
         {
-            string id = await CampaignDetailsDialog.Show(null);
-            if (!string.IsNullOrWhiteSpace(id))
-                OpenCampaign(id);
+            //string id = await CampaignDetailsDialog.Show(null);
+            //if (!string.IsNullOrWhiteSpace(id))
+            //    OpenCampaign(id);
         }
 
-        async void DeleteCampaign(CampaignOverview campaign)
+        void DeleteCampaign(CampaignOverview campaign)
         {
-            if (await MessageBox.Confirm("Delete Campaign", $"Delete \"{campaign.Name}\"?"))
-            {
-                try
-                {
-                    await CampaignService.DeleteCampaign(campaign.ID);
-                }
-                catch (Exception exc)
-                {
-                    await ExceptionDialog.Show(exc);
-                }
-            }
+            //if (await MessageBox.Confirm("Delete Campaign", $"Delete \"{campaign.Name}\"?"))
+            //{
+            //    try
+            //    {
+            //        await CampaignService.DeleteCampaign(campaign.ID);
+            //    }
+            //    catch (Exception exc)
+            //    {
+            //        await ExceptionDialog.Show(exc);
+            //    }
+            //}
         }
 
         public void Dispose()

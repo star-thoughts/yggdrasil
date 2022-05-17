@@ -1,0 +1,28 @@
+﻿@page "/dialogs/messagebox"
+
+<div class="page">
+    <div class="message-box">
+        @MessageBoxOptions.Message
+    </div>
+    <div class="buttons">
+        @switch (MessageBoxOptions.Buttons)
+        {
+            case MessageBoxType.Close:
+                <RadzenButton Text="Close" Click="@(_ => ButtonClicked(MessageBoxResult.Close))"></RadzenButton>
+                break;
+            case MessageBoxType.OkCancel:
+                <RadzenButton Text="OK" Click="@(_ => ButtonClicked(MessageBoxResult.OK))"></RadzenButton>
+                <RadzenButton Text="Cancel" Click="@(_ => ButtonClicked(MessageBoxResult.Cancel))"></RadzenButton>
+                break;
+            case MessageBoxType.YesNo:
+                <RadzenButton Text="Yes" Click="@(_ => ButtonClicked(MessageBoxResult.Yes))"></RadzenButton>
+                <RadzenButton Text="No" Click="@(_ => ButtonClicked(MessageBoxResult.No))"></RadzenButton>
+                break;
+            case MessageBoxType.YesNoCancel:
+                <RadzenButton Text="Yes" Click="@(_ => ButtonClicked(MessageBoxResult.Yes))"></RadzenButton>
+                <RadzenButton Text="No" Click="@(_ => ButtonClicked(MessageBoxResult.No))"></RadzenButton>
+                <RadzenButton Text="Cancel" Click="@(_ => ButtonClicked(MessageBoxResult.Cancel))"></RadzenButton>
+                break;
+        }
+    </div>
+</div>

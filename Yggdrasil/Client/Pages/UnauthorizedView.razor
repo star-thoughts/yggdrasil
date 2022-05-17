@@ -1,1 +1,12 @@
-﻿<div class="unauthorized-view">You are not authorized to view this content.</div>
+﻿<div class="page">
+    <div class="unauthorized-view">You are not authorized to view this content.</div>
+    <AuthorizeView>
+        <NotAuthorized>
+            <div class="containerbox login-area">
+                <RadzenCard class="login-card">
+                    <RadzenLogin AllowRegister="true" AllowResetPassword="false" Login="OnLogin" Register="OnRegister" />
+                </RadzenCard>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
